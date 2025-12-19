@@ -14,18 +14,25 @@ classifiers = [
 ]
 license = {text = "MIT"}
 dependencies = [
-  "typer"
+    "typer",
+    "pytest",
+    "pytest-cov"
 ]
-requires-python = ">= 3.10"
+requires-python = ">= 3.13"
 
-[project.optional-dependencies]
-test = [
-    "coverage",  # testing
-    "pytest",  # testing
-    "ruff",  # linting
-    "ty", # checking types
-    "ipdb", # debugging
+
+[dependency-groups]
+dev = [
+    "rust-just",
+    "pytest",
+    "intellilog",
 ]
+
+
+[build-system]
+requires = ["uv_build >= 0.9.15, <0.10.0"]
+build-backend = "uv_build"
+
 
 [project.urls]
 bugs = "https://github.com/{{cookiecutter.__gh_slug}}/issues"
@@ -35,23 +42,68 @@ homepage = "https://github.com/{{cookiecutter.__gh_slug}}"
 [project.scripts]
 {{cookiecutter.project_slug}} = "{{cookiecutter.project_slug}}.cli:app"
 
-[tool.ty]
-# All rules are enabled as "error" by default; no need to specify unless overriding.
-# Example override: relax a rule for the entire project (uncomment if needed).
-# rules.TY015 = "warn"  # For invalid-argument-type, warn instead of error.
 
 [tool.ruff]
-line-length = 120
-
-[tool.ruff.lint]
-select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # Pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "UP",  # pyupgrade
+extend-select = [
+    "A",    # prevent using keywords that clobber python builtins
+    "B",    # bugbear: security warnings
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "ISC",  # implicit string concatenation
+    "UP",   # alert you when better syntax is available in your python version
+    "RUF",  # the ruff developer's own rules
 ]
+extend-ignore = [
+    "D",        # ignore missing docs
+    "TC",       # false positives for local imports
+    "E501",     # line too long
+    "I001",     # unsorted imports
+    "TRY003",   # external messages in exceptions are too verbose
+    "UP035",    # Checks for uses of deprecated imports based on the minimum supported Python version.
+    "UP006",    # Checks for the use of generics that can be replaced with standard library variants based on PEP 585.
+    "UP007",    # Check for type annotations that can be rewritten based on PEP 604 syntax.
+    "UP015",    # Checks for redundant open mode arguments.
+    "UP040",    # Checks for use of TypeAlias annotations and TypeAliasType assignments for declaring type aliases.
+    "UP045",    # Check for typing.Optional annotations that can be rewritten based on PEP 604 syntax.
+    "A002",     # Checks for function arguments that use the same names as builtins
+    "B905",     # `zip()` without an explicit `strict=` parameter
+]
+
+
+[tool.ruff.lint.isort]
+force-wrap-aliases = false
+force-sort-within-sections = false
+split-on-trailing-comma = true
+lines-after-imports = 2
+
+[tool.ruff.format]
+line-ending = "auto"
+docstring-code-line-length = 90
+docstring-code-format = true
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = true
+
+[tool.ruff.analyze]
+type-checking-imports = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*", "*Test"]
+python_functions = ["test_*"]
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)s] %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+log_file = "logs/pytest.log"
+log_file_mode = "a"
+log_file_level = "INFO"
+log_file_format = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+log_file_date_format = "%Y-%m-%d %H:%M:%S"
 
 [tool.uv]
 package = true
+
+[tool.ty]
+environment = { python = "./.venv", python-version = "3.13" }
