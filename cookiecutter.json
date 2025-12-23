@@ -3,6 +3,7 @@
   "email": "nickcorbin17@yahoo.com",
   "github_username": "iLiftALot",
   "pypi_package_name": "python-boilerplate",
+  "python_version": "3.13",
   "project_name": "Python Boilerplate",
   "project_slug": "{{ cookiecutter.pypi_package_name.replace('-', '_').replace(' ', '_') }}",
   "project_short_description": "Python Boilerplate contains all the boilerplate you need to create a Python package.",

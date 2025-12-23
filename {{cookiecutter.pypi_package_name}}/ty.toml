@@ -1,0 +1,3 @@
+[environment]
+python = "./.venv"
+python-version = "{{ cookiecutter.python_version }}"

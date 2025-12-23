@@ -1,0 +1,4 @@
+package = true
+
+[sources]
+intellilog = { path = "../logger" }
