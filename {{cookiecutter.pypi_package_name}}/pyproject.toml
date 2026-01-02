@@ -28,6 +28,10 @@ dev = [
     "icecream",
     "intellilog @ file:///Users/nicholascorbin/CodeProjects/logger",
 ]
+custom = [
+  "intellipath @ file:///Users/nicholascorbin/CodeProjects/intellipath",
+  "intellifunctools @ file:///Users/nicholascorbin/CodeProjects/intellifunctools",
+]
 
 
 [build-system]
