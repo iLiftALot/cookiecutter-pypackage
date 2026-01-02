@@ -26,7 +26,7 @@ dev = [
     "rust-just",
     "pytest",
     "icecream",
-    "intellilog @ file:///Users/nicholascorbin/CodeProjects/intellilog",
+    "intellilog @ file:///Users/nicholascorbin/CodeProjects/logger",
 ]
 
 
@@ -75,4 +75,4 @@ addopts = "-vv -l -x"
 package = true
 
 [tool.uv.sources]
-intellilog = { path = "../intellilog", editable = true }
+intellilog = { path = "../logger", editable = true }
