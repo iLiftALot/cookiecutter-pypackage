@@ -3,4 +3,4 @@ python = "./.venv"
 python-version = "{{ cookiecutter.python_version }}"
 
 [src]
-include = ["src/*.py", "tests/*.py"]
+include = ["**/*.py"]
