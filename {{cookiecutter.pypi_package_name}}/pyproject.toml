@@ -25,18 +25,14 @@ requires-python = ">= {{ cookiecutter.python_version }}"
 dev = [
     "rust-just",
     "pytest",
-    "intellilog",
-    "icecream"
+    "icecream",
+    "intellilog @ file:///Users/nicholascorbin/CodeProjects/intellilog",
 ]
 
 
 [build-system]
 requires = ["uv_build >= 0.9.15, <0.10.0"]
 build-backend = "uv_build"
-
-
-[tool.uv.sources]
-intellilog = { path = "../logger" }
 
 
 [project.urls]
@@ -74,3 +70,9 @@ addopts = "-vv -l -x"
 # --ff	              Run failed tests first
 # -q	                Quiet mode
 # --durations=10	    Show 10 slowest tests
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+intellilog = { path = "../intellilog", editable = true }
