@@ -24,13 +24,32 @@ requires-python = ">= {{ cookiecutter.python_version }}"
 [dependency-groups]
 dev = [
     "rust-just",
+    "cookiecutter>=2.6.0",
+    "alabaster>=1.0.0",
+    "watchdog>=6.0.0",
     "pytest",
     "icecream",
-    "intellilog @ file:///Users/nicholascorbin/CodeProjects/logger",
 ]
-custom = [
+all = [
+    "typer",
+    "pytest",
+    "pytest-cov",
+    "rust-just",
+    "cookiecutter>=2.6.0",
+    "alabaster>=1.0.0",
+    "watchdog>=6.0.0",
+    "icecream",
+]
+
+[optional-dependencies]
+custom_no_logging = [
   "intellipath @ file:///Users/nicholascorbin/CodeProjects/intellipath",
   "intellifunctools @ file:///Users/nicholascorbin/CodeProjects/intellifunctools",
+]
+custom_with_logging = [
+  "intellipath @ file:///Users/nicholascorbin/CodeProjects/intellipath",
+  "intellifunctools @ file:///Users/nicholascorbin/CodeProjects/intellifunctools",
+  "intellilog @ file:///Users/nicholascorbin/CodeProjects/logger",
 ]
 
 
