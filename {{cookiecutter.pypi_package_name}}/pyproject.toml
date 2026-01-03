@@ -98,4 +98,5 @@ addopts = "-vv -l -x"
 package = true
 
 [tool.uv.sources]
-intellilog = { path = "../logger", editable = true }
+intellipath = { path = "../intellipath", editable = true }
+intellifunctools = { path = "../intellifunctools", editable = true }

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import pytest
 
 """Tests for `{{ cookiecutter.project_slug }}` package."""
