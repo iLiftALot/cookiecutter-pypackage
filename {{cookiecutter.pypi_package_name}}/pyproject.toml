@@ -27,17 +27,9 @@ dev = [
     "cookiecutter>=2.6.0",
     "alabaster>=1.0.0",
     "watchdog>=6.0.0",
+    "sphinx",
+    "furo",
     "pytest",
-    "icecream",
-]
-all = [
-    "typer",
-    "pytest",
-    "pytest-cov",
-    "rust-just",
-    "cookiecutter>=2.6.0",
-    "alabaster>=1.0.0",
-    "watchdog>=6.0.0",
     "icecream",
 ]
 
