@@ -51,6 +51,7 @@ class ChangeHandler(FileSystemEventHandler):
             except Exception as e:
                 print(f"Error running cookiecutter: {e}")
                 raise e
+
             print("Waiting for next change...")
 
 

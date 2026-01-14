@@ -23,13 +23,17 @@ extensions = [
     "sphinx.ext.intersphinx",   # Link to other projects' docs
     "sphinx.ext.todo",          # Support for todo items
     "sphinx.ext.coverage",      # Check documentation coverage
+     "myst_parser",              # Support Markdown files
 ]
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The suffix of source filenames
-source_suffix = ".rst"
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
 
 # The master toctree document
 master_doc = "index"

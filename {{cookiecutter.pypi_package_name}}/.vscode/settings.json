@@ -1,4 +1,55 @@
 {
+    "[python]": {
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.defaultColorDecorators": "never",
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnPaste": true,
+        "editor.formatOnType": true,
+        "editor.parameterHints.enabled": true,
+        "editor.wordBasedSuggestions": "off",
+        "files.autoSave": "afterDelay"
+    },
+    /**
+    * Pylance Settings
+    */
+    "python.analysis.aiHoverSummaries": true,
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.completeFunctionParens": false,
+    "python.analysis.ignore": [
+        ".venv",
+        "build",
+        "dist",
+        "__pycache__",
+    ],
+    "python.analysis.inlayHints.callArgumentNames": "off",
+    "python.analysis.inlayHints.functionReturnTypes": true,
+    "python.analysis.inlayHints.pytestParameters": false,
+    "python.analysis.inlayHints.variableTypes": false,
+    "python.analysis.languageServerMode": "full",
+    "python.analysis.typeCheckingMode": "off",
+    "python.defaultInterpreterPath": "./.venv/bin/python",
+    "python.languageServer": "Pylance",
+    /**
+    * Ruff Settings
+    */
+    "ruff.configuration": "./ruff.toml",
+    "ruff.configurationPreference": "filesystemFirst",
+    "ruff.logFile": "./logs/ruff.log",
+    "ruff.nativeServer": "on",
+    "ruff.path": [
+        "/opt/homebrew/bin/ruff"
+    ],
+    /**
+    * Ty Settings
+    */
     "ty.configurationFile": "./ty.toml",
-    // "ty.configuration": null
+    "ty.disableLanguageServices": true,
+    "ty.inlayHints.callArgumentNames": false,
+    "ty.inlayHints.variableTypes": false,
+    "ty.logFile": "./ty.log",
+    "ty.logLevel": "error",
+    "ty.path": [
+        "/opt/homebrew/bin/ty"
+    ]
 }

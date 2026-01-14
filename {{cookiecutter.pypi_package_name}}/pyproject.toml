@@ -20,6 +20,11 @@ dependencies = [
 ]
 requires-python = ">= {{ cookiecutter.python_version }}"
 
+[project.optional-dependencies]
+custom_packages = [
+  "pkg-registry"
+]
+
 
 [dependency-groups]
 dev = [
@@ -31,17 +36,8 @@ dev = [
     "furo",
     "pytest",
     "icecream",
-]
-
-[optional-dependencies]
-custom_no_logging = [
-  "intellipath @ file:///Users/nicholascorbin/CodeProjects/intellipath",
-  "intellifunctools @ file:///Users/nicholascorbin/CodeProjects/intellifunctools",
-]
-custom_with_logging = [
-  "intellipath @ file:///Users/nicholascorbin/CodeProjects/intellipath",
-  "intellifunctools @ file:///Users/nicholascorbin/CodeProjects/intellifunctools",
-  "intellilog @ file:///Users/nicholascorbin/CodeProjects/logger",
+    "rich",
+    "myst-parser>=4.0.1",
 ]
 
 
@@ -90,5 +86,4 @@ addopts = "-vv -l -x"
 package = true
 
 [tool.uv.sources]
-intellipath = { path = "../intellipath", editable = true }
-intellifunctools = { path = "../intellifunctools", editable = true }
+pkg-registry = { path = "../custom/pkg_registry", editable = true }

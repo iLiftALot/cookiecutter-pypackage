@@ -18,16 +18,16 @@ jobs:
       matrix:
         # Test all supported Python versions under Ubuntu
         os: [ubuntu-latest]
-        python-version: ['3.12', '3.13']
+        python-version: ["{{ cookiecutter.python_version }}"]
 
-    runs-on: ${{ matrix.os }}
+    runs-on: {% raw %}${{ matrix.os }}{% endraw %}
 
     steps:
     - uses: actions/checkout@v4
     - name: Install uv
       uses: astral-sh/setup-uv@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: {% raw %}${{ matrix.python-version }}{% endraw %}
     - name: Install dependencies
       run: |
         uv sync --dev
@@ -37,6 +37,6 @@ jobs:
         uv run ruff check --select=E9,F63,F7,F82
         # exit-zero treats all errors as warnings
         uv run ruff check --exit-zero --statistics
-    - name: Run tests
+    - name: Run tests 
       run: |
         uv run pytest

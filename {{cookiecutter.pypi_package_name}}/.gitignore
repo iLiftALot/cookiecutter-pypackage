@@ -1,10 +1,5 @@
-# Miscellaneous files
-src/**/_[!_]*.py
-tests/**/_[!_]*.py
-run.py
-
 # Under construction files
-dev_*.py
+\**.py
 
 # Virtual environments
 .venv
@@ -20,7 +15,6 @@ venv.bak/
 *.db
 *.sqlite
 *.pkl
-vector_store.*!py
 *.index
 *.metadata
 

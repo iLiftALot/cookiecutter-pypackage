@@ -1,13 +1,27 @@
 {
   "full_name": "Nicholas Corbin",
   "email": "nickcorbin17@yahoo.com",
-  "github_username": "iLiftALot",
   "pypi_package_name": "python-boilerplate",
+
+  "create_github_repo": [false, true],
+  "github_username": "iLiftALot",
+  "github_branch": "master",
+  "github_repository": "{{ cookiecutter.github_username }}/{{ cookiecutter.pypi_package_name }}",
+  "github_private": true,
+
+  "__prompts__": {
+    "github_repository": {
+      "if": "{{ cookiecutter.create_github_repo }} == true"
+    },
+    "github_private": {
+      "if": "{{ cookiecutter.create_github_repo }} == true"
+    }
+  },
+
   "python_version": "3.13",
-  "project_name": "Python Boilerplate",
+  "project_name": "{{ cookiecutter.pypi_package_name.replace('-', ' ').replace('_', ' ') | title }}",
   "project_slug": "{{ cookiecutter.pypi_package_name.replace('-', '_').replace(' ', '_') }}",
-  "project_short_description": "Python Boilerplate contains all the boilerplate you need to create a Python package.",
-  "pypi_username": "{{ cookiecutter.github_username }}",
+  "project_short_description": "...",
   "first_version": "0.1.0",
   "__gh_slug": "{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}"
 }
