@@ -13,7 +13,7 @@ Clone the repository and install with pip:
 
 .. code-block:: bash
 
-   git clone https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}.git
+   git clone https://github.com/{{cookiecutter.__gh_slug}}.git
    cd {{ cookiecutter.project_slug }}
    pip install -e .
 

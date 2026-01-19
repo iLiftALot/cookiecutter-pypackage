@@ -2,26 +2,23 @@
   "full_name": "Nicholas Corbin",
   "email": "nickcorbin17@yahoo.com",
   "pypi_package_name": "python-boilerplate",
-
-  "create_github_repo": [false, true],
-  "github_username": "iLiftALot",
-  "github_branch": "master",
-  "github_repository": "{{ cookiecutter.github_username }}/{{ cookiecutter.pypi_package_name }}",
-  "github_private": true,
-
-  "__prompts__": {
-    "github_repository": {
-      "if": "{{ cookiecutter.create_github_repo }} == true"
-    },
-    "github_private": {
-      "if": "{{ cookiecutter.create_github_repo }} == true"
-    }
-  },
-
+  "create_github_repo": [true, false],
   "python_version": "3.13",
   "project_name": "{{ cookiecutter.pypi_package_name.replace('-', ' ').replace('_', ' ') | title }}",
   "project_slug": "{{ cookiecutter.pypi_package_name.replace('-', '_').replace(' ', '_') }}",
   "project_short_description": "...",
   "first_version": "0.1.0",
-  "__gh_slug": "{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}"
+
+  "__prompts__": {
+    "full_name": "Your full name",
+    "email": "Your email address",
+    "pypi_package_name": "PyPI package name",
+    "create_github_repo": "Create a GitHub repository?",
+    "python_version": "Python version",
+    "project_short_description": "Short project description",
+    "first_version": "Initial version"
+  },
+
+  "__project_dir": "~/CodeProjects/{{cookiecutter.pypi_package_name}}",
+  "__gh_slug": "iLiftALot/{{ cookiecutter.project_slug }}"
 }

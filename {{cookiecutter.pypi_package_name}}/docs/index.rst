@@ -1,7 +1,7 @@
 {{ cookiecutter.project_name }}
 ============
 
-{{ cookiecutter.project_description }}
+{{ cookiecutter.project_short_description }}
 
 .. toctree::
    :maxdepth: 2
