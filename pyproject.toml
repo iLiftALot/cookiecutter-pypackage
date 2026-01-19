@@ -3,7 +3,7 @@ name = "cookiecutter-pypackage"
 version = "0.2.0"
 description = "Cookiecutter template for a Python package"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 license = { text = "MIT" }
 authors = [
     { name = "Audrey M. Roy Greenfeld", email = "audrey@feldroy.com" }
@@ -29,6 +29,7 @@ dependencies = [
     "typer>=0.16.0",
     "alabaster>=1.0.0",
     "watchdog>=6.0.0",
+    "iterm2"
 ]
 
 [project.optional-dependencies]
