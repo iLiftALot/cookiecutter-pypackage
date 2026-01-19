@@ -22,6 +22,10 @@ from scripts import (  # ty:ignore[unresolved-import]
     show_form_dialog,
     FormResult,
     FormInputs,
+    ButtonField,
+    TextField,
+    ComboBoxField,
+    # CheckBoxField,
 )
 
 
@@ -53,11 +57,11 @@ def reveal_hotkey_window():
 def create_gh_modal(iterm: GlobaliTermState) -> FormResult:
     title = "GitHub Settings"
     subtitle = "Git Repository Configuration"
-    button_fields = [
-        ("Submit", "Submit the GitHub repository settings.", ),
-        ("Cancel", "Cancel and do not create a GitHub repository."),
+    button_fields: list[ButtonField] = [
+        ("Submit", "Submit the GitHub repository settings.", None),
+        ("Cancel", "Cancel and do not create a GitHub repository.", None),
     ]
-    comboboxes = [
+    comboboxes: list[ComboBoxField] = [
         (
             "GitHub Repo Visibility",
             "private",
@@ -65,7 +69,7 @@ def create_gh_modal(iterm: GlobaliTermState) -> FormResult:
             ["public", "private", "local"],
         )
     ]
-    text_fields = [
+    text_fields: list[TextField] = [
         (
             "Project Directory",
             "{{ cookiecutter.__project_dir }}",
