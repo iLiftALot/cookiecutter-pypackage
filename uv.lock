@@ -128,11 +128,12 @@ wheels = [
 [[package]]
 name = "cookiecutter-pypackage"
 version = "0.2.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "alabaster" },
     { name = "cookiecutter" },
     { name = "iterm2" },
+    { name = "rich" },
     { name = "typer" },
     { name = "watchdog" },
 ]
@@ -161,6 +162,7 @@ requires-dist = [
     { name = "iterm2" },
     { name = "pytest", marker = "extra == 'test'" },
     { name = "pytest-cookies", marker = "extra == 'test'" },
+    { name = "rich" },
     { name = "ruff", marker = "extra == 'test'" },
     { name = "ty", marker = "extra == 'test'" },
     { name = "typer", specifier = ">=0.16.0" },

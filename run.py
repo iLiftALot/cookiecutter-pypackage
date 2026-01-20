@@ -16,10 +16,14 @@ The generated python-boilerplate/ directory will be created in the repo root.
 import shutil
 import time
 from pathlib import Path
-
+import sys
 from cookiecutter.main import cookiecutter
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
+from rich.console import Console
+
+
+console = Console(emoji=True)
 
 
 class ChangeHandler(FileSystemEventHandler):
@@ -37,37 +41,43 @@ class ChangeHandler(FileSystemEventHandler):
         current_time = time.time()
         if current_time - self.last_run > self.debounce_period:
             self.last_run = current_time
-            print(f"Detected change in {event.src_path}. Running cookiecutter...")
+            console.print(
+                f":warning: [yellow]Detected change in[/yellow] [green]{str(Path(event.src_path).relative_to(Path.cwd()))}[/green]. [yellow]Running cookiecutter...[/yellow]"
+            )
             try:
                 # The output directory is in the repo root (matches cookiecutter.json pypi_package_name)
                 output_dir = Path("python-boilerplate")
                 if output_dir.exists() and output_dir.is_dir():
-                    print(f"Removing existing directory: {output_dir}")
+                    console.print(f"[b]:warning:[/b] [yellow]Removing existing directory:[/yellow] [red]{output_dir}[/red]")
                     shutil.rmtree(output_dir)
 
                 # The template is the current directory, output to repo root
-                cookiecutter(".", no_input=True, output_dir=".")
-                print("Cookiecutter finished successfully.")
+                cookiecutter(".", no_input=True, output_dir=".", extra_context={ "test_key": "test_value" })
+                console.print(":white_check_mark: [green]Cookiecutter finished successfully.[/green]")
             except Exception as e:
-                print(f"Error running cookiecutter: {e}")
+                console.print(f":x: [red]Error running cookiecutter[/red]:\n{e}")
                 raise e
 
-            print("Waiting for next change...")
+            console.print(":hourglass: [yellow]Waiting for next change...[/yellow]")
 
-
-if __name__ == "__main__":
+def main():
     # Watch the template directory where actual changes matter
-    path = "{{cookiecutter.pypi_package_name}}"
+    path = str(Path("{{cookiecutter.pypi_package_name}}").resolve())
     event_handler = ChangeHandler()
     observer = Observer()
     observer.schedule(event_handler, path, recursive=True)
     observer.start()
-    print(f"Watching for file changes in '{path}'...")
-    print("Press Ctrl+C to stop.")
+    console.print(f":eyes: [yellow]Watching for file changes in[/yellow] [green][u][b]~/{Path(path).relative_to(Path.home())}[/b][/u][/green]...")
+    console.print(":green_circle: [yellow]Press[/yellow] [bold][u]Ctrl+C[/u][/bold] [yellow]to stop.[/yellow]")
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("Stopping watcher.")
+        sys.stderr.write("\r  ") # Clear the ^C from console
+        console.print(":stop_sign: [red]Stopping watcher...[/red]")
         observer.stop()
     observer.join()
+
+
+if __name__ == "__main__":
+    main()

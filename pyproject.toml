@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 license = { text = "MIT" }
 authors = [
-    { name = "Audrey M. Roy Greenfeld", email = "audrey@feldroy.com" }
+    { name = "Nicholas Corbin", email = "nicholas.corbin@example.com" }
 ]
 keywords = ["cookiecutter", "template", "package"]
 classifiers = [
@@ -29,7 +29,8 @@ dependencies = [
     "typer>=0.16.0",
     "alabaster>=1.0.0",
     "watchdog>=6.0.0",
-    "iterm2"
+    "iterm2",
+    "rich"
 ]
 
 [project.optional-dependencies]
@@ -43,12 +44,16 @@ test = [
 ]
 
 [project.urls]
-homepage = "https://github.com/audreyfeldroy/cookiecutter-pypackage"
+homepage = "https://github.com/iLiftALot/cookiecutter-pypackage"
+
+[project.scripts]
+cc_watch = "run:main"
+cc_pypackage = "cookiecutter_pypackage.cli:main"
 
 [tool.ruff]
 exclude = [
     "*cookiecutter.pypi_package_name*"
-    ]
+]
 
 [tool.pytest.ini_options]
 testpaths = [
@@ -59,3 +64,6 @@ testpaths = [
 dev = [
     "rust-just>=1.42.4",
 ]
+
+[tool.uv]
+package = true
