@@ -56,7 +56,8 @@ async def poly_modal_alert_handler(
     """
 
     alert_instance = alert.PolyModalAlert(
-        title=title, subtitle=subtitle # , window_id=window_id
+        title=title,
+        subtitle=subtitle,  # , window_id=window_id
     )
 
     for btn in button_names or []:

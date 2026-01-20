@@ -1,25 +1,25 @@
 from collections.abc import Callable
-from typing import TypedDict
 from dataclasses import dataclass, field
+from typing import NamedTuple, TypedDict
 
 
 class GitHubRepoConfigType(TypedDict, total=True):
-    project_directory: str
-    github_username: str
-    github_repo_branch: str
-    github_repo_name: str
-    github_repo_description: str
-    github_repo_visibility: str
+    project_directory: str | None
+    github_username: str | None
+    github_repo_branch: str | None
+    github_repo_name: str | None
+    github_repo_description: str | None
+    github_repo_visibility: str | None
 
 
 @dataclass
 class GitHubRepoConfig:
-    project_directory: str = field(default="{{ cookiecutter.__project_dir }}")
-    github_username: str = field(default="iLiftALot")
-    github_repo_branch: str = field(default="master")
-    github_repo_name: str = field(default="{{ cookiecutter.__gh_slug }}")
-    github_repo_description: str = field(default="{{ cookiecutter.project_short_description }}")
-    github_repo_visibility: str = field(default="local")
+    project_directory: str | None = None
+    github_username: str | None = None
+    github_repo_branch: str | None = None
+    github_repo_name: str | None = None
+    github_repo_description: str | None = None
+    github_repo_visibility: str | None = None
 
     def __getitem__(self, name):
         return getattr(self, name)
@@ -27,21 +27,66 @@ class GitHubRepoConfig:
     def __setitem__(self, name, value):
         return setattr(self, name, value)
 
+
 @dataclass
 class FormResult:
-
     cancelled: bool = True
     config: GitHubRepoConfig = field(default_factory=GitHubRepoConfig)
 
 
-type ButtonField = tuple[str, str, Callable[[], None] | None]
-"""(button_label, help_text, callback_function)"""
-type TextField = tuple[str, str, str]
+class ButtonField(NamedTuple):
+    """(field_label, help_text, callback_function, bind_to)"""
+
+    field_label: str
+    help_text: str
+    callback_function: Callable[[], str | None] | None = None
+    bind_to: str | None = None
+
+
+TextField = NamedTuple(
+    "TextField", [("field_label", str), ("default_value", str), ("help_text", str)]
+)
 """(field_label, default_value, help_text)"""
-type ComboBoxField = tuple[str, str, str, list[str]]
+
+
+ComboBoxField = NamedTuple(
+    "ComboBoxField",
+    [
+        ("field_label", str),
+        ("default_value", str),
+        ("help_text", str),
+        ("options", list[str]),
+    ],
+)
 """(field_label, default_value, help_text, options)"""
-type CheckBoxField = tuple[str, bool | int, str]
+
+
+CheckBoxField = NamedTuple(
+    "CheckBoxField",
+    [("field_label", str), ("default_value", bool | int), ("help_text", str)],
+)
 """(field_label, default_value, help_text)"""
+
+LabelField = NamedTuple("LabelField", [("field_label", str)])
+"""(field_label)"""
+
+type AnyField = ButtonField | TextField | ComboBoxField | CheckBoxField | LabelField
+"""Union of all field types."""
+
+
+class OrderedFormField(NamedTuple):
+    """(field_tuple, xy, key)"""
+
+    field_tuple: AnyField
+    xy: tuple[int, int]
+    key: str | None = None
+
+
+def place(
+    field_tuple: AnyField, row: int, col: int, key: str | None = None
+) -> OrderedFormField:
+    """Helper to place a field at (row, col) with an optional key."""
+    return OrderedFormField(field_tuple=field_tuple, xy=(row, col), key=key)
 
 
 class FormInputs(TypedDict, total=False):
@@ -50,20 +95,24 @@ class FormInputs(TypedDict, total=False):
 
     ---
 
-    :param button_fields: A list of button fields.
-    :type button_fields: ``list[tuple[str, str, Callable[[], None] | None]]``
-    :param text_fields: A list of text fields.
-    :type text_fields: ``list[tuple[str, str, str]]``
-    :param combo_boxes: A list of combo box fields.
-    :type combo_boxes: ``list[tuple[str, str, str, list[str]]]``
-    :param check_boxes: A list of check box fields.
-    :type check_boxes: ``list[tuple[str, bool | int, str]]``
+    :param ordered_fields: A dictionary containing form fields in a specific structure.
+    :type ordered_fields: ``list[OrderedFormField]``
 
+    :param button_fields: A list of button fields.
+    :type button_fields: ``list[ButtonField]``
+    :param text_fields: A list of text fields.
+    :type text_fields: ``list[TextField]``
+    :param combo_boxes: A list of combo box fields.
+    :type combo_boxes: ``list[ComboBoxField]``
+    :param check_boxes: A list of check box fields.
+    :type check_boxes: ``list[CheckBoxField]``
     ---
 
     .. Example::
 
         ```python
+        # Example usage without 'ordered_fields' key:
+
         form_settings: FormInputs = FormInputs(
             button_fields=[
                 ("Submit", "Submit the form.", None),
@@ -83,7 +132,26 @@ class FormInputs(TypedDict, total=False):
                 ("Enable notifications", 1, "Get notified about updates."),
             ],
         )
-        ```
+
+        # Example usage with 'ordered_fields' key:
+
+        # These will be rendered in the order defined in the 'ordered_fields' list
+        form_settings: FormInputs = FormInputs(
+            ordered_fields=[
+                (TextField("Name", "John Doe", "Enter your full name."), (0, 0)),
+                (ButtonField("Submit", "Submit the form.", lambda: None), (0, 1)),
+                (ComboBoxField("Country", "USA", "Select your country.", ["USA", "Canada", "UK"]), (1, 0)),
+                (CheckBoxField("Subscribe to newsletter", True, "Receive monthly updates."), (1, 1)),
+            ],
+        )
+    """
+
+    ordered_fields: list[OrderedFormField]
+    """
+    A list of tuples each containing:
+    - field_type: ``type[AnyField]``
+    - field_tuple: ``AnyField``
+    - xy: ``tuple[int, int]``
     """
 
     button_fields: list[ButtonField]
@@ -91,7 +159,7 @@ class FormInputs(TypedDict, total=False):
     A list of tuples each containing:
     - button_label: ``str``
     - help_text: ``str``
-    - callback_function: ``Callable[[], None] | None``
+    - callback_function: ``Callable[[], str | None] | None``
     """
     text_fields: list[TextField]
     """

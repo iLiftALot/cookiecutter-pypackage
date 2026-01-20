@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 
-# Append project directory to sys.path
 sys.path.insert(
     0,
     str(Path("~/CodeProjects/cookiecutter-pypackage/hooks").expanduser()),
@@ -9,23 +8,27 @@ sys.path.insert(
 
 import asyncio
 import textwrap
-from dataclasses import asdict
 from ast import literal_eval
+from dataclasses import asdict
 from shlex import split
 from subprocess import run
+from tkinter import filedialog
+
 from scripts import (  # ty:ignore[unresolved-import]
-    GlobaliTermState,
+    ButtonField,
+    ComboBoxField,
+    FormInputs,
+    FormResult,
     GitHubRepoConfig,
+    GlobaliTermState,
+    OrderedFormField,
+    # CheckBoxField,
+    TextField,
+    LabelField,
+    run_iterm_setup,
     create_github_repository,
     send_command_to_iterm,
-    setup_session,
     show_form_dialog,
-    FormResult,
-    FormInputs,
-    ButtonField,
-    TextField,
-    ComboBoxField,
-    # CheckBoxField,
 )
 
 
@@ -54,46 +57,100 @@ def reveal_hotkey_window():
     run(["osascript", "-e", script], check=True)
 
 
-def create_gh_modal(iterm: GlobaliTermState) -> FormResult:
+async def create_gh_modal(iterm: GlobaliTermState) -> FormResult:
     title = "GitHub Settings"
     subtitle = "Git Repository Configuration"
-    button_fields: list[ButtonField] = [
-        ("Submit", "Submit the GitHub repository settings.", None),
-        ("Cancel", "Cancel and do not create a GitHub repository.", None),
-    ]
-    comboboxes: list[ComboBoxField] = [
-        (
-            "GitHub Repo Visibility",
-            "private",
-            "Public/Private for remote repo visibility, or local for non-remote.",
-            ["public", "private", "local"],
-        )
-    ]
-    text_fields: list[TextField] = [
-        (
-            "Project Directory",
-            "{{ cookiecutter.__project_dir }}",
-            "Path to the project directory.",
+    initial_dir = await iterm.get_cwd()
+    ordered_fields: list[OrderedFormField] = [
+        OrderedFormField(
+            field_tuple=ButtonField(
+                field_label="Submit",
+                help_text="Submit the GitHub repository settings.",
+                callback_function=None,
+            ),
+            xy=(7, 0),
         ),
-        ("GitHub Username", "iLiftALot", "GitHub username for the repository."),
-        ("GitHub Repo Branch", "master", "Branch name for the repository."),
-        (
-            "GitHub Repo Name",
-            "{{ cookiecutter.__gh_slug }}",
-            "Name of the GitHub repository.",
+        OrderedFormField(
+            field_tuple=ButtonField(
+                field_label="Cancel",
+                help_text="Cancel and do not create a GitHub repository.",
+                callback_function=None,
+            ),
+            xy=(7, 1),
         ),
-        (
-            "GitHub Repo Description",
-            "{{ cookiecutter.project_short_description }}",
-            "Description of the GitHub repository.",
+        OrderedFormField(
+            field_tuple=ComboBoxField(
+                field_label="GitHub Repo Visibility",
+                default_value="private",
+                help_text="Public/Private for remote repo visibility, or local for non-remote.",
+                options=["public", "private", "local"],
+            ),
+            xy=(6, 0),
+        ),
+        OrderedFormField(
+            field_tuple=LabelField(field_label="GitHub Repository Settings"),
+            xy=(0, 0),
+        ),
+        OrderedFormField(
+            field_tuple=TextField(
+                field_label="",
+                default_value="{{ cookiecutter.__project_dir }}",
+                help_text="",
+            ),
+            xy=(0, 1),
+            key="project_directory",
+        ),
+        OrderedFormField(
+            field_tuple=ButtonField(
+                field_label="Project Directory",
+                help_text="Path to the project directory.",
+                callback_function=(
+                    lambda: filedialog.askdirectory(
+                        initialdir=initial_dir,
+                        mustexist=True,
+                        title="Select Project Directory",
+                    )
+                ),
+                bind_to="project_directory",
+            ),
+            xy=(0, 1),
+        ),
+        OrderedFormField(
+            field_tuple=TextField(
+                field_label="GitHub Username",
+                default_value="iLiftALot",
+                help_text="GitHub username for the repository.",
+            ),
+            xy=(2, 0),
+        ),
+        OrderedFormField(
+            field_tuple=TextField(
+                field_label="GitHub Repo Branch",
+                default_value="master",
+                help_text="Branch name for the repository.",
+            ),
+            xy=(3, 0),
+        ),
+        OrderedFormField(
+            field_tuple=TextField(
+                field_label="GitHub Repo Name",
+                default_value="{{ cookiecutter.__gh_slug }}",
+                help_text="Name of the GitHub repository.",
+            ),
+            xy=(4, 0),
+        ),
+        OrderedFormField(
+            field_tuple=TextField(
+                field_label="GitHub Repo Description",
+                default_value="{{ cookiecutter.project_short_description }}",
+                help_text="Description of the GitHub repository.",
+            ),
+            xy=(5, 0),
         ),
     ]
 
-    form_settings: FormInputs = FormInputs(
-        button_fields=button_fields,
-        combo_boxes=comboboxes,
-        text_fields=text_fields,
-    )
+    form_settings: FormInputs = FormInputs(ordered_fields=ordered_fields)
+
     gh_modal_response: FormResult = show_form_dialog(
         title=title,
         subtitle=subtitle,
@@ -104,7 +161,7 @@ def create_gh_modal(iterm: GlobaliTermState) -> FormResult:
 
 
 async def run_hook() -> None:
-    iterm: GlobaliTermState = await setup_session()
+    iterm = await run_iterm_setup(None, allow_repl_connection=True)
     reveal_hotkey_window_osa = textwrap.dedent("""\
     tell application "iTerm2"
         tell current window
@@ -113,28 +170,23 @@ async def run_hook() -> None:
     end tell\
     """)
     osa_command = f"osascript -e '{reveal_hotkey_window_osa}'"
-    run_command(osa_command)
-    # await iterm.window.async_create_tab(profile=iterm.profile.name)
-
     should_create_repo: bool = literal_eval("{{cookiecutter.create_github_repo}}")
-    cd_command = 'cd "{{cookiecutter.__project_dir}}"'
+    cd_command = "cd {{ cookiecutter.__project_dir }}"
     gh_commands: list[str] = []
     if (
         should_create_repo
-        and (gh_modal_response := create_gh_modal(iterm)).cancelled is False
+        and (gh_modal_response := await create_gh_modal(iterm)).cancelled is False
     ):
-        print(asdict(gh_modal_response))
         gh_config: GitHubRepoConfig = gh_modal_response.config
-        cd_command = f'cd "{gh_config.project_directory}"'
+        cd_command = f"cd {gh_config.project_directory}"
         gh_commands.extend(create_github_repository(**asdict(gh_config)))
 
-    cd_command = (
-        'cd "~/CodeProjects/cookiecutter-pypackage"'  # --- TEMPORARY OVERRIDE ---
-    )
-
+    run_command(osa_command)
     await send_command_to_iterm(iterm.session, cd_command)
-    # for cmd in gh_commands:
-    #     await send_command_to_iterm(iterm.session, cmd)
+    for cmd in gh_commands:
+        await send_command_to_iterm(iterm.session, cmd)
+        await asyncio.sleep(2)
+        # run_command(cmd)
 
 
 def main() -> None:
