@@ -1,6 +1,6 @@
 # Justfile for {{cookiecutter.pypi_package_name}}
 
-# Show available commands
+# Show available commands 
 list:
     @just --list
 
