@@ -3,7 +3,11 @@ from pathlib import Path
 
 sys.path.insert(
     0,
-    str(Path("~/CodeProjects/cookiecutter-pypackage/hooks").expanduser()),
+    str(
+        Path(
+            "/Users/nicholascorbin/CodeProjects/custom/confs/.cookiecutters/cookiecutter-pypackage/hooks"
+        )
+    ),
 )
 
 import asyncio
@@ -184,9 +188,8 @@ async def run_hook() -> None:
     run_command(osa_command)
     await send_command_to_iterm(iterm.session, cd_command)
     for cmd in gh_commands:
-        await send_command_to_iterm(iterm.session, cmd)
         await asyncio.sleep(2)
-        # run_command(cmd)
+        await send_command_to_iterm(iterm.session, cmd)
 
 
 def main() -> None:

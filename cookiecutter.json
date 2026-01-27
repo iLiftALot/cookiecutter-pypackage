@@ -20,5 +20,5 @@
   },
 
   "__project_dir": "~/CodeProjects/{{cookiecutter.pypi_package_name}}",
-  "__gh_slug": "iLiftALot/{{ cookiecutter.project_slug }}"
+  "__gh_slug": "iLiftALot/{{ cookiecutter.project_slug.replace('_', '-') }}"
 }

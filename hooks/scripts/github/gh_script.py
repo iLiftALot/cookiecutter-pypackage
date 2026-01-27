@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Unpack
 from scripts.github.shared_types import GitHubRepoConfigType  # ty:ignore[unresolved-import]
 
@@ -23,6 +24,8 @@ def create_github_repository(
             "project_directory", "{{ cookiecutter.__project_dir }}"
         )
         commands.append(
-            f'gh repo create "{repo_name}" --{visibility} --source="{project_dir}" --remote=origin --description="{description}"'
+            f'''gh repo create "{repo_name}" --{visibility} --source="{
+                project_dir if str(Path.cwd()) != Path(project_dir).parent else "."
+            }" --remote=origin --description="{description}"'''
         )
     return commands
