@@ -1,8 +1,7 @@
 # Under construction / Dev files
 \**.py
-cli/
-__main__.py
-
+{% raw %}cli/{% endraw %}
+{% raw %}__main__.py{% endraw %}
 
 # Virtual environments
 .venv

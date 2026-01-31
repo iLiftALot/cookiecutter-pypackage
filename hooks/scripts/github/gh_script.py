@@ -9,7 +9,7 @@ def create_github_repository(
     """Create a GitHub repository using gh CLI."""
 
     branch = github_config.get("github_repo_branch", "master")
-    commands = ["uv sync", f"git init --initial-branch={branch}"]
+    commands = ["uv sync --dev", f"git init --initial-branch={branch}"]
     visibility = github_config.get("github_repo_visibility", "local")
     should_create_remote = visibility != "local"
 
