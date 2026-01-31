@@ -1,7 +1,7 @@
 # Under construction / Dev files
 \**.py
 cli/
-_main__.py
+__main__.py
 
 
 # Virtual environments
