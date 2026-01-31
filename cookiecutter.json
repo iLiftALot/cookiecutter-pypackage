@@ -19,6 +19,6 @@
     "first_version": "Initial version"
   },
 
-  "__project_dir": "~/CodeProjects/{{cookiecutter.pypi_package_name}}",
+  "__project_dir": "/Users/nicholascorbin/CodeProjects/{{cookiecutter.pypi_package_name}}",
   "__gh_slug": "iLiftALot/{{ cookiecutter.project_slug.replace('_', '-') }}"
 }

@@ -48,17 +48,27 @@ class ChangeHandler(FileSystemEventHandler):
                 # The output directory is in the repo root (matches cookiecutter.json pypi_package_name)
                 output_dir = Path("python-boilerplate")
                 if output_dir.exists() and output_dir.is_dir():
-                    console.print(f"[b]:warning:[/b] [yellow]Removing existing directory:[/yellow] [red]{output_dir}[/red]")
+                    console.print(
+                        f"[b]:warning:[/b] [yellow]Removing existing directory:[/yellow] [red]{output_dir}[/red]"
+                    )
                     shutil.rmtree(output_dir)
 
                 # The template is the current directory, output to repo root
-                cookiecutter(".", no_input=True, output_dir=".", extra_context={ "test_key": "test_value" })
-                console.print(":white_check_mark: [green]Cookiecutter finished successfully.[/green]")
+                cookiecutter(
+                    ".",
+                    no_input=True,
+                    output_dir=".",
+                    extra_context={"test_key": "test_value"},
+                )
+                console.print(
+                    ":white_check_mark: [green]Cookiecutter finished successfully.[/green]"
+                )
             except Exception as e:
                 console.print(f":x: [red]Error running cookiecutter[/red]:\n{e}")
                 raise e
 
             console.print(":hourglass: [yellow]Waiting for next change...[/yellow]")
+
 
 def main():
     # Watch the template directory where actual changes matter
@@ -67,13 +77,17 @@ def main():
     observer = Observer()
     observer.schedule(event_handler, path, recursive=True)
     observer.start()
-    console.print(f":eyes: [yellow]Watching for file changes in[/yellow] [green][u][b]~/{Path(path).relative_to(Path.home())}[/b][/u][/green]...")
-    console.print(":green_circle: [yellow]Press[/yellow] [bold][u]Ctrl+C[/u][/bold] [yellow]to stop.[/yellow]")
+    console.print(
+        f":eyes: [yellow]Watching for file changes in[/yellow] [green][u][b]~/{Path(path).relative_to(Path.home())}[/b][/u][/green]..."
+    )
+    console.print(
+        ":green_circle: [yellow]Press[/yellow] [bold][u]Ctrl+C[/u][/bold] [yellow]to stop.[/yellow]"
+    )
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        sys.stderr.write("\r  ") # Clear the ^C from console
+        sys.stderr.write("\r  ")  # Clear the ^C from console
         console.print(":stop_sign: [red]Stopping watcher...[/red]")
         observer.stop()
     observer.join()

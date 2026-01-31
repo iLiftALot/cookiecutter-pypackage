@@ -16,11 +16,6 @@ license = {text = "MIT"}
 dependencies = []
 requires-python = ">= {{ cookiecutter.python_version }}"
 
-[project.optional-dependencies]
-custom_packages = [
-  "pkg-registry"
-]
-
 
 [dependency-groups]
 dev = [
@@ -50,7 +45,7 @@ changelog = "https://github.com/{{cookiecutter.__gh_slug}}/blob/master/changelog
 homepage = "https://github.com/{{cookiecutter.__gh_slug}}"
 
 [project.scripts]
-{{cookiecutter.project_slug}} = "{{cookiecutter.project_slug}}.cli:app"
+{{cookiecutter.project_slug}} = "{{cookiecutter.project_slug}}.cli.cmd:app"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -82,6 +77,3 @@ addopts = "-vv -l -x"
 
 [tool.uv]
 package = true
-
-[tool.uv.sources]
-pkg-registry = { path = "../custom/pkg_registry", editable = true }
