@@ -121,7 +121,7 @@ console: MultiConsole = MultiConsole(
 
 def _linkify_text(obj: Path | Text | str | ConsoleRenderable | RichCast) -> Text | ConsoleRenderable | RichCast:
     if isinstance(obj, Path):
-        s = f"[link={obj!s}]{obj!s}[/link]"
+        s = f"[link={obj!s}]{obj.relative_to(Path(__file__).parents[2])!s}[/link]"
         return Text.from_markup(s)
     elif isinstance(obj, Text):
         s = obj.plain
