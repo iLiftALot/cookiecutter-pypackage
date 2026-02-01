@@ -1,6 +1,6 @@
 from functools import partial
 from typing import Annotated
-from python_boilerplate.cli.completions import (
+from {{ cookiecutter.project_slug }}.cli.completions import (
     module_completion,
     module_objs_completion,
     obj_args_completion,

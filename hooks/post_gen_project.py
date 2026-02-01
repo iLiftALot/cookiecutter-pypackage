@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -11,7 +12,6 @@ sys.path.insert(
 )
 
 import asyncio
-import textwrap
 from ast import literal_eval
 from dataclasses import asdict
 from shlex import split
@@ -24,14 +24,11 @@ from scripts import (  # ty:ignore[unresolved-import]
     FormInputs,
     FormResult,
     GitHubRepoConfig,
-    GlobaliTermState,
     OrderedFormField,
     # CheckBoxField,
     TextField,
     LabelField,
-    run_iterm_setup,
     create_github_repository,
-    send_command_to_iterm,
     show_form_dialog,
 )
 
@@ -49,22 +46,10 @@ def run_command(command: str) -> None:
         print(f"\n{stdout}")
 
 
-def reveal_hotkey_window():
-    """Reveal the iTerm2 hotkey window using AppleScript."""
-    script = """
-    tell application "iTerm2"
-        tell current window
-            reveal hotkey window
-        end tell
-    end tell
-    """
-    run(["osascript", "-e", script], check=True)
-
-
-async def create_gh_modal(iterm: GlobaliTermState) -> FormResult:
+async def create_gh_modal() -> FormResult:
     title = "GitHub Settings"
     subtitle = "Git Repository Configuration"
-    initial_dir = await iterm.get_cwd()
+    initial_dir = os.getenv("PWD", os.getcwd())
     ordered_fields: list[OrderedFormField] = [
         OrderedFormField(
             field_tuple=ButtonField(
@@ -165,31 +150,24 @@ async def create_gh_modal(iterm: GlobaliTermState) -> FormResult:
 
 
 async def run_hook() -> None:
-    iterm = await run_iterm_setup(None, allow_repl_connection=True)
-    reveal_hotkey_window_osa = textwrap.dedent("""\
-    tell application "iTerm2"
-        tell current window
-            reveal hotkey window
-        end tell
-    end tell\
-    """)
-    osa_command = f"osascript -e '{reveal_hotkey_window_osa}'"
     should_create_repo: bool = literal_eval("{{cookiecutter.create_github_repo}}")
     cd_command = "cd {{ cookiecutter.__project_dir }}"
     gh_commands: list[str] = []
     if (
         should_create_repo
-        and (gh_modal_response := await create_gh_modal(iterm)).cancelled is False
+        and (gh_modal_response := await create_gh_modal()).cancelled is False
     ):
         gh_config: GitHubRepoConfig = gh_modal_response.config
         cd_command = f"cd {gh_config.project_directory}"
         gh_commands.extend(create_github_repository(**asdict(gh_config)))
 
-    run_command(osa_command)
-    await send_command_to_iterm(iterm.session, cd_command)
-    for cmd in gh_commands:
-        await asyncio.sleep(2)
-        await send_command_to_iterm(iterm.session, cmd)
+    init_commands = [
+        cd_command,
+        "uv sync --dev",
+        *gh_commands
+    ]
+    for cmd in init_commands:
+        run_command(cmd)
 
 
 def main() -> None:
