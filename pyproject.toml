@@ -4,7 +4,7 @@ version = "0.2.0"
 description = "Cookiecutter template for a Python package"
 readme = "README.md"
 requires-python = ">=3.13"
-license = { text = "MIT" }
+license = "MIT"
 authors = [
     { name = "Nicholas Corbin", email = "nicholas.corbin@example.com" }
 ]
@@ -14,7 +14,6 @@ classifiers = [
     "Environment :: Console",
     "Intended Audience :: Developers",
     "Natural Language :: English",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -29,8 +28,8 @@ dependencies = [
     "typer>=0.16.0",
     "alabaster>=1.0.0",
     "watchdog>=6.0.0",
-    "iterm2",
-    "rich"
+    "rich",
+    "iterm2-api-wrapper"
 ]
 
 [project.optional-dependencies]
@@ -67,3 +66,15 @@ dev = [
 
 [tool.uv]
 package = true
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+iterm2_api_wrapper = { workspace = true }
+
+[tool.setuptools]
+py-modules = ["run"]
+
+[tool.setuptools.packages.find]
+exclude = ["hooks*", "packages*", "tests*", "docs*", "{{cookiecutter*", "python-boilerplate*"]
