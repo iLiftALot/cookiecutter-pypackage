@@ -1,3 +1,6 @@
 [submodule "hooks/scripts/iterm2-api-wrapper"]
 	path = hooks/scripts/iterm2-api-wrapper
 	url = https://github.com/iLiftALot/iterm2-api-wrapper.git
+[submodule "packages/iterm2-api-wrapper"]
+	path = packages/iterm2-api-wrapper
+	url = https://github.com/iLiftALot/iterm2-api-wrapper.git

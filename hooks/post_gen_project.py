@@ -15,7 +15,7 @@ from ast import literal_eval
 from dataclasses import asdict
 from subprocess import run
 from tkinter import filedialog
-import time
+import asyncio
 from scripts import (  # ty:ignore[unresolved-import]
     ButtonField,
     ComboBoxField,
@@ -27,8 +27,10 @@ from scripts import (  # ty:ignore[unresolved-import]
     # CheckBoxField,
     TextField,
     create_github_repository,
-    show_form_dialog,
+    show_form_dialog
 )
+from iterm2_api_wrapper.client import iTermClient
+from iterm2_api_wrapper.state import iTermState
 
 
 def run_command(command: str, cwd: str | Path | None = None) -> None:
@@ -156,6 +158,7 @@ def create_gh_modal() -> FormResult:
 def run_hook() -> None:
     should_create_repo: bool = literal_eval("{{cookiecutter.create_github_repo}}")
     project_dir = Path("{{ cookiecutter.__project_dir }}")
+    cd_command = f"cd {project_dir}"
     gh_commands: list[str] = []
 
     if (
@@ -164,15 +167,28 @@ def run_hook() -> None:
     ):
         gh_config: GitHubRepoConfig = gh_modal_response.config
         project_dir = Path(gh_config.project_directory)
+        cd_command = f"cd {project_dir}"
         gh_commands.extend(create_github_repository(**asdict(gh_config)))
 
     # Commands that need to run in the project directory
-    init_commands = ["uv sync --dev", *gh_commands]
-
-    for cmd in init_commands:
-        print(f"\nRunning command: {cmd}\n")
-        time.sleep(1)
-        run_command(cmd, cwd=project_dir)
+    init_commands = [cd_command, "uv sync --dev", "source .venv/bin/activate", *gh_commands]
+    with iTermClient[iTermState](new_tab=True) as client:
+        state = client.get_state()
+        for cmd in init_commands:
+            print(f"\nRunning command: {cmd}\n")
+            # Use run_coroutine_threadsafe since state.run_command is async
+            # and must run on the client's internal event loop
+            future = asyncio.run_coroutine_threadsafe(
+                state.run_command(cmd), client.loop
+            )
+            try:
+                output = future.result(timeout=120)
+                if output.strip():
+                    print(output)
+            except TimeoutError:
+                print(f"Command timed out: {cmd}")
+            except Exception as e:
+                print(f"Command failed: {cmd}\nError: {e}")
 
 
 def main() -> None:
