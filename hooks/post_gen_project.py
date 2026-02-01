@@ -11,42 +11,46 @@ sys.path.insert(
     ),
 )
 
-import asyncio
 from ast import literal_eval
 from dataclasses import asdict
-from shlex import split
 from subprocess import run
 from tkinter import filedialog
-
+import time
 from scripts import (  # ty:ignore[unresolved-import]
     ButtonField,
     ComboBoxField,
     FormInputs,
     FormResult,
     GitHubRepoConfig,
+    LabelField,
     OrderedFormField,
     # CheckBoxField,
     TextField,
-    LabelField,
     create_github_repository,
     show_form_dialog,
 )
 
 
-def run_command(command: str) -> None:
-    """Run a shell command and print its output."""
+def run_command(command: str, cwd: str | Path | None = None) -> None:
+    """Run a shell command and print its output.
 
-    process = run(split(command), capture_output=True, text=True)
+    Args:
+        command: The shell command to run.
+        cwd: Working directory for the command.
+    """
+    # Use shell=True for shell built-ins and complex commands
+    process = run(command, capture_output=True, text=True, shell=True, cwd=cwd)
     stdout, stderr = process.stdout, process.stderr
 
     if process.returncode != 0:
-        print(f"\nError running command: {command}")
+        print(f"Error running command: {command}")
         print(stderr)
     else:
-        print(f"\n{stdout}")
+        if stdout.strip():
+            print(f"\n{stdout}")
 
 
-async def create_gh_modal() -> FormResult:
+def create_gh_modal() -> FormResult:
     title = "GitHub Settings"
     subtitle = "Git Repository Configuration"
     initial_dir = os.getenv("PWD", os.getcwd())
@@ -149,29 +153,30 @@ async def create_gh_modal() -> FormResult:
     return gh_modal_response
 
 
-async def run_hook() -> None:
+def run_hook() -> None:
     should_create_repo: bool = literal_eval("{{cookiecutter.create_github_repo}}")
-    cd_command = "cd {{ cookiecutter.__project_dir }}"
+    project_dir = Path("{{ cookiecutter.__project_dir }}")
     gh_commands: list[str] = []
+
     if (
         should_create_repo
-        and (gh_modal_response := await create_gh_modal()).cancelled is False
+        and (gh_modal_response := create_gh_modal()).cancelled is False
     ):
         gh_config: GitHubRepoConfig = gh_modal_response.config
-        cd_command = f"cd {gh_config.project_directory}"
+        project_dir = Path(gh_config.project_directory)
         gh_commands.extend(create_github_repository(**asdict(gh_config)))
 
-    init_commands = [
-        cd_command,
-        "uv sync --dev",
-        *gh_commands
-    ]
+    # Commands that need to run in the project directory
+    init_commands = ["uv sync --dev", *gh_commands]
+
     for cmd in init_commands:
-        run_command(cmd)
+        print(f"\nRunning command: {cmd}\n")
+        time.sleep(1)
+        run_command(cmd, cwd=project_dir)
 
 
 def main() -> None:
-    asyncio.run(run_hook())
+    run_hook()
 
 
 if __name__ == "__main__":
