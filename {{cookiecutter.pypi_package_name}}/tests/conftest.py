@@ -467,7 +467,7 @@ def log_session_start_and_end(request: pytest.FixtureRequest) -> Generator[None]
 
     yield
 
-    duration = _format_duration(time.perf_counter() - session.start_time)  # type: ignore[attr-defined]
+    duration = _format_duration(time.perf_counter() - session.start_time)
 
     # Results summary
     passed = session.testscollected - session.testsfailed

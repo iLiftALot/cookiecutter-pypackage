@@ -34,6 +34,16 @@ dev = [
     "dotenv"
 ]
 
+[project.optional-dependencies]
+test = [
+    "coverage",  # testing
+    "pytest",  # testing
+    "pytest-cookies",  # testing
+    "ruff",  # linting
+    "ty", # checking types
+    "ipdb"
+]
+
 
 [build-system]
 requires = ["uv_build >= 0.9.15, <0.10.0"]

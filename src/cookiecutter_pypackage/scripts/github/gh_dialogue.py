@@ -5,7 +5,7 @@ from itertools import groupby
 from tkinter import ttk
 from typing import Unpack
 
-from scripts.github.shared_types import (  # ty:ignore[unresolved-import]
+from .shared_types import (
     AnyField,
     ButtonField,
     CheckBoxField,

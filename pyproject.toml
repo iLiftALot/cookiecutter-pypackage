@@ -15,21 +15,20 @@ classifiers = [
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development",
 ]
 dependencies = [
-    "cookiecutter>=2.6.0",
-    "typer>=0.16.0",
-    "alabaster>=1.0.0",
-    "watchdog>=6.0.0",
+    "cookiecutter",
+    "typer",
+    "alabaster",
+    "watchdog",
     "rich",
-    "iterm2-api-wrapper"
+    "iterm2-api-wrapper",
+    "jinja2",
+    "pygithub",
+    "dotenv",
 ]
 
 [project.optional-dependencies]
@@ -46,7 +45,7 @@ test = [
 homepage = "https://github.com/iLiftALot/cookiecutter-pypackage"
 
 [project.scripts]
-cc_watch = "run:main"
+cc_watch = "cookiecutter_pypackage.run:main"
 cc_pypackage = "cookiecutter_pypackage.cli:main"
 
 [tool.ruff]
@@ -73,8 +72,6 @@ members = ["packages/*"]
 [tool.uv.sources]
 iterm2_api_wrapper = { workspace = true }
 
-[tool.setuptools]
-py-modules = ["run"]
-
 [tool.setuptools.packages.find]
+where = ["src"]
 exclude = ["hooks*", "packages*", "tests*", "docs*", "{{cookiecutter*", "python-boilerplate*"]

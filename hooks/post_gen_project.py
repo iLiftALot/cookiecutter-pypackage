@@ -1,22 +1,11 @@
 import os
-import sys
 from pathlib import Path
-
-sys.path.insert(
-    0,
-    str(
-        Path(
-            "/Users/nicholascorbin/CodeProjects/custom/confs/.cookiecutters/cookiecutter-pypackage/hooks"
-        )
-    ),
-)
-
-from ast import literal_eval
+from dotenv import load_dotenv
 from dataclasses import asdict
 from subprocess import run
 from tkinter import filedialog
 import asyncio
-from scripts import (  # ty:ignore[unresolved-import]
+from cookiecutter_pypackage.scripts import (
     ButtonField,
     ComboBoxField,
     FormInputs,
@@ -27,10 +16,16 @@ from scripts import (  # ty:ignore[unresolved-import]
     # CheckBoxField,
     TextField,
     create_github_repository,
-    show_form_dialog
+    show_form_dialog,
 )
-from iterm2_api_wrapper.client import iTermClient
-from iterm2_api_wrapper.state import iTermState
+from iterm2_api_wrapper.client import create_iterm_client
+
+
+load_dotenv()
+SUCCESS = "\x1b[1;32m"  # Green
+INFO = "\x1b[1;33m"     # Yellow
+ERROR = "\x1b[1;31m"    # Red
+TERMINATOR = "\x1b[0m"  # Reset color
 
 
 def run_command(command: str, cwd: str | Path | None = None) -> None:
@@ -156,7 +151,7 @@ def create_gh_modal() -> FormResult:
 
 
 def run_hook() -> None:
-    should_create_repo: bool = literal_eval("{{cookiecutter.create_github_repo}}")
+    should_create_repo: bool = "{{cookiecutter.create_github_repo}}" == "yes"
     project_dir = Path("{{ cookiecutter.__project_dir }}")
     cd_command = f"cd {project_dir}"
     gh_commands: list[str] = []
@@ -166,16 +161,21 @@ def run_hook() -> None:
         and (gh_modal_response := create_gh_modal()).cancelled is False
     ):
         gh_config: GitHubRepoConfig = gh_modal_response.config
-        project_dir = Path(gh_config.project_directory)
+        project_dir = Path(gh_config.project_directory or project_dir)
         cd_command = f"cd {project_dir}"
         gh_commands.extend(create_github_repository(**asdict(gh_config)))
 
     # Commands that need to run in the project directory
-    init_commands = [cd_command, "uv sync --dev", "source .venv/bin/activate", *gh_commands]
-    with iTermClient[iTermState](new_tab=True) as client:
+    init_commands = [
+        cd_command,
+        "uv sync --dev",
+        "source .venv/bin/activate",
+        *gh_commands,
+    ]
+    with create_iterm_client(new_tab=True) as client:
         state = client.get_state()
         for cmd in init_commands:
-            print(f"\nRunning command: {cmd}\n")
+            print(f">>> {INFO}{cmd}{TERMINATOR}")
             # Use run_coroutine_threadsafe since state.run_command is async
             # and must run on the client's internal event loop
             future = asyncio.run_coroutine_threadsafe(
@@ -186,9 +186,9 @@ def run_hook() -> None:
                 if output.strip():
                     print(output)
             except TimeoutError:
-                print(f"Command timed out: {cmd}")
+                print(ERROR + f"Command timed out: {cmd}" + TERMINATOR)
             except Exception as e:
-                print(f"Command failed: {cmd}\nError: {e}")
+                print(ERROR + f"Command failed: {cmd}\nError: {e}" + TERMINATOR)
 
 
 def main() -> None:
@@ -196,6 +196,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    print("Starting post-generation script...")
+    print(INFO + "Starting post-generation script..." + TERMINATOR)
     main()
-    print("\nPost-generation script completed.")
+    print(SUCCESS + "Post-generation script completed." + TERMINATOR)

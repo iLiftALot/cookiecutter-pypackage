@@ -3,6 +3,7 @@ import ast
 import csv
 import copy
 import importlib
+import inspect
 import sys
 from functools import lru_cache
 from types import ModuleType
@@ -11,8 +12,8 @@ import typer
 from pathlib import Path
 
 
-PACKAGE_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = PACKAGE_DIR.parents[1]
+PACKAGE_DIR = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = PACKAGE_DIR.parents[3]
 COMPLETION_LOG = PROJECT_ROOT / "logs" / "completion_debug.log"
 
 
@@ -421,7 +422,7 @@ def module_objs_completion(incomplete: str, ctx: typer.Context) -> list[str]:
     return sorted(completions)
 
 
-def obj_args_completion(incomplete: str, ctx: typer.Context) -> list[str]:
+def obj_args_completion(incomplete: str, ctx: typer.Context) -> list[tuple[str, str]]:
     """Provide completion for object/function arguments based on collected function argument names."""
     module_name = ctx.params.get("module")
     module_obj_name = ctx.params.get("module_obj")
@@ -438,10 +439,14 @@ def obj_args_completion(incomplete: str, ctx: typer.Context) -> list[str]:
             f"No function info found for {module_obj_name} in {import_path}."
         )
         return []
-
-    completions = [
-        f"{arg_name} ({arg_type})"
-        for arg_name, arg_type in func_info["args"].items()
-        if arg_name.startswith(incomplete)
+    sig = inspect.signature(func_info["func"]).parameters
+    func_params = [
+        (f"{name}='", f"{param} ({param.kind.description})")
+        for name, param in sig.items()
+        if name not in ("return", "state", "client")
     ]
-    return completions
+    return [
+        (value, help_text)
+        for value, help_text in func_params[len(ctx.params.get("args", ()) or ()) :]
+        if value.startswith(incomplete)
+    ]

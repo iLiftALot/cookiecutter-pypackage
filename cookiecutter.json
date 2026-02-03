@@ -2,23 +2,27 @@
   "full_name": "Nicholas Corbin",
   "email": "nickcorbin17@yahoo.com",
   "pypi_package_name": "python-boilerplate",
-  "create_github_repo": [true, false],
   "python_version": "3.13",
   "project_name": "{{ cookiecutter.pypi_package_name.replace('-', ' ').replace('_', ' ') | title }}",
-  "project_slug": "{{ cookiecutter.pypi_package_name.replace('-', '_').replace(' ', '_') }}",
+  "project_slug": "{{ cookiecutter.pypi_package_name.replace('-', '_').replace(' ', '_') | lower }}",
   "project_short_description": "...",
   "first_version": "0.1.0",
-
+  "create_github_repo": ["yes", "no"],
   "__prompts__": {
     "full_name": "Your full name",
     "email": "Your email address",
     "pypi_package_name": "PyPI package name",
-    "create_github_repo": "Create a GitHub repository?",
     "python_version": "Python version",
+    "project_name": "Project name",
+    "project_slug": "Project slug (used for directory and module names)",
     "project_short_description": "Short project description",
-    "first_version": "Initial version"
+    "first_version": "Initial version",
+    "create_github_repo": "Create a GitHub repository?"
   },
-
-  "__project_dir": "/Users/nicholascorbin/CodeProjects/{{cookiecutter.pypi_package_name}}",
-  "__gh_slug": "iLiftALot/{{ cookiecutter.project_slug.replace('_', '-') }}"
+  "__debug": "{{ true if cookiecutter.pypi_package_name == 'python-boilerplate' else false }}",
+  "__project_dir": "/Users/nicholascorbin/CodeProjects/{{ cookiecutter.pypi_package_name }}",
+  "__gh_slug": "iLiftALot/{{ cookiecutter.project_slug.replace('_', '-') }}",
+  "_extensions": [
+    "src.cookiecutter_pypackage.scripts.jinja2_extensions.pylibrary.JsonQuoteExtension"
+  ]
 }
