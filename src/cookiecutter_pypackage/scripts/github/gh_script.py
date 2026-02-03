@@ -109,6 +109,7 @@ class GithubWrapper(Github):
             lazy,
         )
         self.github_config = github_config or {}
+        self.lazy = lazy
         self.__repo: RepositoryWrapper | None = None
         self.__user: AuthenticatedUser.AuthenticatedUser = self.get_user()
         logging.getLogger("github.Requester").disabled = True
@@ -123,14 +124,31 @@ class GithubWrapper(Github):
     def user(self) -> AuthenticatedUser.AuthenticatedUser:
         return self.__user
 
-    def set_repo(self, full_name_or_id: str, lazy: bool = False) -> GithubWrapper:
+    @staticmethod
+    def remove_unset_items(d: dict[str, Any]) -> dict[str, Any]:
+        return GithubObject.NotSet.remove_unset_items(d)
+
+    def requestJsonAndCheck(
+        self,
+        verb: GitHubRequestValue,
+        url: str,
+        parameters: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+        input: Any | None = None,
+        follow_302_redirect: bool = False,
+    ) -> tuple[dict[str, Any], Any]:
+        return self.requester.requestJsonAndCheck(
+            verb, url, parameters, headers, input, follow_302_redirect
+        )
+
+    def set_repo(self, full_name_or_id: str) -> GithubWrapper:
         url_base = "/repositories/" if isinstance(full_name_or_id, int) else "/repos/"
         url = f"{url_base}{full_name_or_id}"
-        if lazy:
+        if self.lazy:
             return RepositoryWrapper(
                 self.github_config, self.requester, {}, {"url": url}, completed=False
             )
-        headers, data = self.requester.requestJsonAndCheck("GET", url)
+        headers, data = self.requestJsonAndCheck("GET", url)
         self.__repo = RepositoryWrapper(
             github_config=self.github_config,
             requester=self.requester,
@@ -144,8 +162,8 @@ class GithubWrapper(Github):
 
     def create_repo(self, **kwargs: Unpack[RepositoryKwargs]) -> RepositoryWrapper:
         """Create a new repository locally and remotely on GitHub."""
-        post_parameters: dict[str, Any] = GithubObject.NotSet.remove_unset_items(kwargs)
-        headers, data = self.requester.requestJsonAndCheck(
+        post_parameters: dict[str, Any] = self.remove_unset_items(kwargs)
+        headers, data = self.requestJsonAndCheck(
             "POST", "/user/repos", input=post_parameters
         )
         self.__repo = RepositoryWrapper(
@@ -185,7 +203,7 @@ def create_github_repository(
             name=repo_name,
             description=description,
             private=(visibility == "private"),
-            auto_init=False,
+            auto_init=False, # Avoid auto commit
         )
         commands.extend(
             [
