@@ -18,7 +18,7 @@ from cookiecutter_pypackage.scripts import (
     create_github_repository,
     show_form_dialog,
 )
-from iterm2_api_wrapper.client import create_iterm_client
+from iterm2_api_wrapper import create_iterm_client
 
 
 load_dotenv()

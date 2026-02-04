@@ -46,7 +46,7 @@ homepage = "https://github.com/iLiftALot/cookiecutter-pypackage"
 
 [project.scripts]
 cc_watch = "cookiecutter_pypackage.run:main"
-cc_pypackage = "cookiecutter_pypackage.cli:main"
+# cc_pypackage = "cookiecutter_pypackage.cli:main"
 
 [tool.ruff]
 exclude = [

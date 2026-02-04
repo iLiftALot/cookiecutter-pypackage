@@ -3,20 +3,24 @@ list:
     @just --list
 
 # Generate project using defaults
-bake BAKE_OPTIONS="--no-input":  
-    cookiecutter {{BAKE_OPTIONS}} . --overwrite-if-exists
+# bake BAKE_OPTIONS="--no-input":
+#     cookiecutter {{BAKE_OPTIONS}} . --overwrite-if-exists
 
-# Watch for changes
-watch BAKE_OPTIONS="--no-input": bake
-    watchmedo shell-command \
-        -p '*.*' \
-        -c 'just bake {{BAKE_OPTIONS}}' \
-        -W -R -D {{'{{cookiecutter.project_slug}}'}}
+# # Watch for changes
+# watch BAKE_OPTIONS="--no-input": bake
+#     watchmedo shell-command \
+#         -p '*.*' \
+#         -c 'just bake {{BAKE_OPTIONS}}' \
+#         -W -R -D {{'{{cookiecutter.project_slug}}'}}
 
 # replay: BAKE_OPTIONS="--replay"
 # replay: watch
 # 	;
 
+watch:
+    cc_watch
+    # ⬆︎
+    # >>> uv run src/cookiecutter_pypackage/run.py
 
 # Show available commands
 help:

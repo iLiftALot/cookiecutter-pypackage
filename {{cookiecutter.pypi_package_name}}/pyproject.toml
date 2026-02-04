@@ -1,18 +1,18 @@
 [project]
 name = "{{cookiecutter.pypi_package_name}}"
 version = "{{ cookiecutter.first_version }}"
-description = "{{cookiecutter.project_short_description}}"
+description = "{{ cookiecutter.project_short_description }}"
 readme = "README.md"
 authors = [
-  {name = "{{cookiecutter.full_name}}", email = "{{cookiecutter.email}}"}
+  {name = "{{ cookiecutter.full_name }}", email = "{{ cookiecutter.email }}"}
 ]
 maintainers = [
-  {name = "{{cookiecutter.full_name}}", email = "{{cookiecutter.email}}"}
+  {name = "{{ cookiecutter.full_name }}", email = "{{ cookiecutter.email }}"}
 ]
 classifiers = [
     # TODO
 ]
-license = {text = "MIT"}
+license = "MIT"
 dependencies = []
 requires-python = ">= {{ cookiecutter.python_version }}"
 
@@ -51,9 +51,9 @@ build-backend = "uv_build"
 
 
 [project.urls]
-bugs = "https://github.com/{{cookiecutter.__gh_slug}}/issues"
-changelog = "https://github.com/{{cookiecutter.__gh_slug}}/blob/master/changelog.md"
-homepage = "https://github.com/{{cookiecutter.__gh_slug}}"
+bugs = "https://github.com/{{ cookiecutter.__gh_slug }}/issues"
+changelog = "https://github.com/{{ cookiecutter.__gh_slug }}/blob/master/changelog.md"
+homepage = "https://github.com/{{ cookiecutter.__gh_slug }}"
 
 [project.scripts]
 {{cookiecutter.project_slug}} = "{{cookiecutter.project_slug}}.cli.cmd:app"
