@@ -48,7 +48,7 @@ class RepositoryKwargs(TypedDict, total=False):
 class RepositoryWrapper(Repository.Repository):
     def __init__(
         self,
-        github_config: GitHubRepoConfigType,
+        repo_config: GitHubRepoConfigType,
         requester: Requester.Requester,
         headers: dict[str, str | int] | None = None,
         attributes: dict[str, Any] | None = None,
@@ -60,12 +60,12 @@ class RepositoryWrapper(Repository.Repository):
         super().__init__(
             requester, headers, attributes, completed, url=url, accept=accept
         )
-        self.github_config = github_config
+        self.repo_config = repo_config
         self._set_attributes()
 
     def _set_attributes(self) -> None:
         class RepoAttributes(StrEnum):
-            DEFAULT_BRANCH = self.github_config.get("github_repo_branch", "master")
+            DEFAULT_BRANCH = self.repo_config.get("branch", "master")
 
         self._default_branch = RepoAttributes.DEFAULT_BRANCH
 
@@ -73,7 +73,7 @@ class RepositoryWrapper(Repository.Repository):
 class GithubWrapper(Github):
     def __init__(
         self,
-        github_config: GitHubRepoConfigType | None = None,
+        repo_config: GitHubRepoConfigType,
         login_or_token: str | None = None,
         password: str | None = None,
         jwt: str | None = None,
@@ -108,7 +108,7 @@ class GithubWrapper(Github):
             auth,
             lazy,
         )
-        self.github_config = github_config or {}
+        self.repo_config: GitHubRepoConfigType = repo_config
         self.lazy = lazy
         self.__repo: RepositoryWrapper | None = None
         self.__user: AuthenticatedUser.AuthenticatedUser = self.get_user()
@@ -141,16 +141,16 @@ class GithubWrapper(Github):
             verb, url, parameters, headers, input, follow_302_redirect
         )
 
-    def set_repo(self, full_name_or_id: str) -> GithubWrapper:
+    def set_repo(self, full_name_or_id: str | int) -> GithubWrapper:
         url_base = "/repositories/" if isinstance(full_name_or_id, int) else "/repos/"
         url = f"{url_base}{full_name_or_id}"
         if self.lazy:
             return RepositoryWrapper(
-                self.github_config, self.requester, {}, {"url": url}, completed=False
+                self.repo_config, self.requester, {}, {"url": url}, completed=False
             )
         headers, data = self.requestJsonAndCheck("GET", url)
         self.__repo = RepositoryWrapper(
-            github_config=self.github_config,
+            repo_config=self.repo_config,
             requester=self.requester,
             headers=headers,
             attributes=data,
@@ -162,12 +162,12 @@ class GithubWrapper(Github):
 
     def create_repo(self, **kwargs: Unpack[RepositoryKwargs]) -> RepositoryWrapper:
         """Create a new repository locally and remotely on GitHub."""
-        post_parameters: dict[str, Any] = self.remove_unset_items(kwargs)
+        post_parameters: dict[str, Any] = self.remove_unset_items({**kwargs})
         headers, data = self.requestJsonAndCheck(
             "POST", "/user/repos", input=post_parameters
         )
         self.__repo = RepositoryWrapper(
-            github_config=self.github_config,
+            repo_config=self.repo_config,
             requester=self.requester,
             headers=headers,
             attributes=data,
@@ -179,31 +179,29 @@ class GithubWrapper(Github):
 
 
 def create_github_repository(
-    **github_config: Unpack[GitHubRepoConfigType],
+    **repo_config: Unpack[GitHubRepoConfigType],
 ) -> list[str]:
-    """Create a GitHub repository using gh CLI."""
-
-    github = GithubWrapper(github_config=github_config, auth=GITHUB_AUTH)
-    branch = github_config.get("github_repo_branch", "master")
+    github = GithubWrapper(repo_config=repo_config, auth=GITHUB_AUTH)
+    branch = repo_config.get("branch", "master")
     commands = [
         f"git init --initial-branch={branch}",
         "git add . && git commit -m 'Initial commit'",
     ]
-    visibility = github_config.get("github_repo_visibility", "local")
+    visibility = repo_config.get("visibility", "local")
     should_create_remote = visibility != "local"
 
     if should_create_remote:
-        repo_name = github_config.get(
-            "github_repo_name", "{{ cookiecutter.__gh_slug }}"
-        ).split("/")[-1]
-        description = github_config.get(
-            "github_repo_description", "{{ cookiecutter.project_short_description }}"
+        repo_name = repo_config.get("name", "{{ cookiecutter.__gh_slug }}") # user/repo
+        description = repo_config.get(
+            "description", "{{ cookiecutter.project_short_description }}"
         )
+        assert repo_name is not None
+        assert description is not None
         repo = github.create_repo(
-            name=repo_name,
+            name=repo_name.split("/")[-1],
             description=description,
             private=(visibility == "private"),
-            auto_init=False, # Avoid auto commit
+            auto_init=False,  # Avoid auto commit
         )
         commands.extend(
             [
