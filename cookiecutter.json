@@ -19,10 +19,11 @@
     "first_version": "Initial version",
     "create_github_repo": "Create a GitHub repository?"
   },
-  "__debug": "{{ true if cookiecutter.pypi_package_name == 'python-boilerplate' else false }}",
-  "__project_dir": "/Users/nicholascorbin/CodeProjects/{{ cookiecutter.pypi_package_name }}",
+  "__debug": "{{ cookiecutter.pypi_package_name == 'python-boilerplate' }}",
+  "__project_dir": "{% set Path = import('pathlib').Path %}{{ Path(Env('PROJECT_DIR').value) if not cookiecutter.__debug else Path(Env('COOKIECUTTER_CONFIG').value).parent / 'cookiecutter-pypackage' }}",
   "__gh_slug": "iLiftALot/{{ cookiecutter.project_slug.replace('_', '-') }}",
+  "__extra_test": "{% set Path = import('pathlib').Path %}{{ Path.cwd().relative_to(cookiecutter.__project_dir) }}",
   "_extensions": [
-    "src.cookiecutter_pypackage.scripts.jinja2_extensions.pylibrary.JsonQuoteExtension"
+    "src.cookiecutter_pypackage.scripts.jinja2_extensions.pylibrary.PyLibraryExtension"
   ]
 }

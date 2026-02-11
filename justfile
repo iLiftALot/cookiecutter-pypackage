@@ -18,9 +18,10 @@ list:
 # 	;
 
 watch:
-    cc_watch
-    # ⬆︎
-    # >>> uv run src/cookiecutter_pypackage/run.py
+    -cc_watch
+
+# ⬆︎
+# >>> uv run src/cookiecutter_pypackage/run.py
 
 # Show available commands
 help:
