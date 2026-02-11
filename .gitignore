@@ -141,6 +141,7 @@ celerybeat.pid
 
 # Environments
 .env
+!{{cookiecutter.pypi_package_name}}/.env
 .envrc
 .venv
 env/
