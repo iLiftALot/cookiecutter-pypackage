@@ -146,15 +146,17 @@ def path_exists(value: str) -> ValidationReport:
     while True:
         candidate = base / p
         if candidate.exists():
-            return ValidationReport(ValidationStatus.VALID, Severity.OK, None, value)
+            break
         parent = base.parent
         if parent == base:
             break
         base = parent
-
-    return ValidationReport(
-        ValidationStatus.INVALID, Severity.ERROR, f"Path does not exist: {p}", value
-    )
+    
+    if not candidate.exists():
+        return ValidationReport(
+            ValidationStatus.INVALID, Severity.ERROR, f"Path does not exist: {p}", value
+        )
+    return ValidationReport(ValidationStatus.VALID, Severity.OK, None, value)
 
 
 def no_spaces_warning(value: Any) -> ValidationReport:

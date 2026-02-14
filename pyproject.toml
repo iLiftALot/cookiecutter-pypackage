@@ -29,6 +29,7 @@ dependencies = [
     "jinja2",
     "pygithub",
     "dotenv",
+    "customtkinter>=5.2.2",
 ]
 
 [project.optional-dependencies]

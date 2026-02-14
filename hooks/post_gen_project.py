@@ -42,7 +42,8 @@ async def run_hook() -> None:
     project_dir = Path.cwd().parent.name / Path.cwd().relative_to(
         "{{ cookiecutter.__project_dir }}"
     )
-    project_name = "{{ cookiecutter.pypi_package_name }}"
+    print(f"{INFO}Project directory: {project_dir}{TERMINATOR}")
+    # project_name = "{{ cookiecutter.pypi_package_name }}"
     cd_command = f"cd '{project_dir}'"
     gh_commands: list[str] = []
     gh_username, gh_repo_name = ("{{ cookiecutter.__gh_slug }}").split("/")
@@ -64,8 +65,8 @@ async def run_hook() -> None:
             return
 
         gh_config: GitHubRepoConfig = result.to_config()
-        project_dir = Path(gh_config.project_directory or project_dir)
-        cd_command = f"cd '{project_dir}/{project_name}'"
+        project_dir = gh_config.project_directory
+        cd_command = f"cd '{project_dir}'"
         gh_commands.extend(create_github_repository(**gh_config.asdict()))
 
     # Commands that need to run in the project directory
@@ -75,6 +76,7 @@ async def run_hook() -> None:
         "source .venv/bin/activate",
         *gh_commands,
     ]
+    # exit(0)
     async with create_iterm_client(new_tab=True) as client:
         state = await client.get_state_async()
         for cmd in init_commands:

@@ -1,21 +1,39 @@
 import tkinter as tk
-from tkinter import ttk
+from typing import Callable
+
+import customtkinter as ctk
 
 
-class CreateToolTip(object):
+class CreateToolTip:
     """
     Creates a tooltip for a given widget
     """
 
-    def __init__(self, widget: tk.Widget, text: str, delay: int = 500) -> None:
+    def __init__(
+        self,
+        widget: ctk.CTkBaseClass,
+        text: str,
+        delay: int = 500,
+        debug_cb: Callable[[ctk.CTkBaseClass, str], str] | None = None,
+    ) -> None:
+        self.debug_cb = debug_cb
         self.widget = widget
         self.text = text
         self.tip_window = None
         self._after_id: str | None = None  # tracks the pending after() call
         self._auto_hide_id: str | None = None
         self.delay = delay  # ms before tooltip appears
+
         self.widget.bind("<Enter>", self.enter)
         self.widget.bind("<Leave>", self.leave)
+
+    def __setattr__(self, name, value):
+        if name == "text" and object.__getattribute__(self, "debug_cb"):
+            debug_cb = object.__getattribute__(self, "debug_cb")
+            widget = object.__getattribute__(self, "widget")
+            if debug_cb and widget:
+                value = debug_cb(widget, value)
+        object.__setattr__(self, name, value)
 
     def enter(self, event: tk.Event | None = None):
         self._after_id = self.widget.after(self.delay, self.show_tip)
@@ -39,14 +57,13 @@ class CreateToolTip(object):
         self.tip_window.attributes("-topmost", True)
         self.tip_window.transient(self.widget.winfo_toplevel())
 
-        label = ttk.Label(self.tip_window, text=self.text)
+        label = ctk.CTkLabel(self.tip_window, text=self.text)
         label.pack(ipadx=1)
 
         self.tip_window.update_idletasks()
+
         # auto-hide after 10 seconds
-        self._auto_hide_id = self.tip_window.after(
-            10000, self.hide_tip
-        )
+        self._auto_hide_id = self.tip_window.after(10000, self.hide_tip)
 
     def hide_tip(self, event: tk.Event | None = None):
         if self._auto_hide_id is not None:
@@ -58,4 +75,3 @@ class CreateToolTip(object):
             except tk.TclError:
                 pass
             self.tip_window = None
-

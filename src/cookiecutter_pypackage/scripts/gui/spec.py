@@ -43,7 +43,7 @@ message string if invalid, or ``None`` if valid."""
 
 
 @dataclass(frozen=True, slots=True)
-class FieldSpec:
+class FieldSpec: #: (str, os.PathLike, Any)]:
     """Specification for a single form field.
 
     Parameters:
@@ -55,8 +55,9 @@ class FieldSpec:
         help_text: Tooltip text shown on hover.
         options: For ``SELECT`` fields — the list of valid choices.
         readonly: For ``SELECT`` fields — whether the combobox is read-only.
-        callback: For ``BUTTON`` fields — the function to invoke on click.
-            Return value (if ``str``) is pushed into the *bind_to* field.
+        callback: For ``BUTTON`` fields — the function to call when clicked.  Receives the
+            current form values as a dict and returns a value to assign to the field specified by
+            *bind_to* (or ignored if *bind_to* is ``None``).
         bind_to: For ``BUTTON`` fields — the *key* of the target field whose
             value should be updated with the callback's return value.
         row: Grid row index (0-based).
@@ -72,7 +73,7 @@ class FieldSpec:
     help_text: str = ""
     options: list[str] = field(default_factory=list)
     readonly: bool = False
-    callback: Callable[..., str | None] | None = None
+    callback: Callable[..., str] | None = None
     bind_to: str | None = None
     row: int = 0
     col: int = 0

@@ -81,8 +81,8 @@ class GitHubRepoDialog:
             size=12,
             weight="normal",
             slant="roman",
-            underline="normal",
-            overstrike="normal",
+            underline=False,
+            overstrike=False,
         ).value
         initial_dir = os.getenv("PWD", os.getcwd())
 
@@ -91,9 +91,9 @@ class GitHubRepoDialog:
         # the callback after construction.
         dialog_ref: FormDialog | None = None
 
-        def _browse() -> str | None:
+        def _browse() -> str:
             if dialog_ref is None or dialog_ref._dialog is None:
-                return None
+                raise RuntimeError("Dialog reference not set for browse callback.")
             new_dir = ask_directory(
                 dialog_ref._dialog,
                 initial_dir=initial_dir,
@@ -101,10 +101,13 @@ class GitHubRepoDialog:
             )
             if new_dir is None:
                 print("Directory selection cancelled.")
-                return None
-            containing_dir = Path(new_dir).parent.name
-            new_dir_name = Path(new_dir).name
-            return os.path.join(containing_dir, new_dir_name)
+                return os.path.relpath(str(Path(initial_dir).parent), start=initial_dir)
+            full_path = Path(os.path.abspath(new_dir)).resolve()
+            relative_path = os.path.relpath(
+                full_path, start=str(Path(initial_dir).parent)
+            )
+            print(f"Selected directory: {new_dir} (relative path: {relative_path})")
+            return relative_path
 
         spec = (
             DialogBuilder("GitHub Repository Configuration", debug=self._debug)
@@ -118,8 +121,8 @@ class GitHubRepoDialog:
             # )
             # -- row 1: project directory entry + browse button
             .add_text(
-                "project_directory",
-                label="Project Directory",
+                "directory",
+                label="Directory",
                 default=self._project_dir,
                 row=1,
                 col=1,
@@ -193,14 +196,21 @@ class GitHubRepoDialog:
                 font=text_field_font,
             )
             # -- action buttons (row value doesn't matter — they go in the bar)
-            .add_button("submit", help_text="Create the repository.", row=7, col=0)
-            .add_button("cancel", help_text="Cancel without creating.", row=7, col=1)
+            .add_button("submit", help_text="Create the repository.", row=7, col=1)
+            .add_button("cancel", help_text="Cancel without creating.", row=7, col=2)
         ).build()
 
         dialog = FormDialog(spec, debug=self._debug)
         dialog_ref = dialog  # patch the reference for _browse
 
         generic_result = dialog.show()
+
+        # Resolve the relative display path with the absolute path
+        relative_dir: str = generic_result.values.get("project_directory", "")
+        if relative_dir:
+            generic_result.values["project_directory"] = str(
+                (Path(initial_dir).parent / relative_dir).resolve()
+            )
 
         # Wrap into GitHubFormResult
         gh_result = GitHubFormResult(

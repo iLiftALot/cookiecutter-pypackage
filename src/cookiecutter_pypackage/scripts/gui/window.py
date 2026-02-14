@@ -6,11 +6,10 @@ on macOS, and parented file-dialog wrappers.
 
 from __future__ import annotations
 
-import tkinter as tk
-from tkinter import filedialog
+import customtkinter as ctk
 
 
-def center_window(window: tk.Toplevel | tk.Tk) -> None:
+def center_window(window: ctk.CTkToplevel | ctk.Tk) -> None:
     """Center *window* on screen based on its requested geometry."""
     window.update_idletasks()
     width = max(window.winfo_reqwidth(), window.winfo_width())
@@ -20,7 +19,7 @@ def center_window(window: tk.Toplevel | tk.Tk) -> None:
     window.geometry(f"{width}x{height}+{x}+{y}")
 
 
-def bring_to_front_briefly(window: tk.Toplevel | tk.Tk) -> None:
+def bring_to_front_briefly(window: ctk.CTkToplevel | ctk.CTk) -> None:
     """Bring *window* to the front using a brief ``-topmost`` strategy.
 
     Sets ``-topmost`` to ``True``, calls ``lift()`` and ``focus_force()``,
@@ -35,7 +34,7 @@ def bring_to_front_briefly(window: tk.Toplevel | tk.Tk) -> None:
     window.after(200, lambda: window.attributes("-topmost", False))
 
 
-def make_modal(dialog: tk.Toplevel, parent: tk.Tk) -> None:
+def make_modal(dialog: ctk.CTkToplevel, parent: ctk.CTk) -> None:
     """Make *dialog* modal relative to *parent*.
 
     Sets the transient parent, grabs input focus, and waits for the dialog
@@ -47,7 +46,7 @@ def make_modal(dialog: tk.Toplevel, parent: tk.Tk) -> None:
 
 
 def ask_directory(
-    parent: tk.Toplevel | tk.Tk,
+    parent: ctk.CTkToplevel | ctk.CTk,
     *,
     initial_dir: str | None = None,
     title: str = "Select Directory",
@@ -57,7 +56,7 @@ def ask_directory(
     Parenting avoids the file dialog appearing behind the modal on macOS.
     Returns the selected path, or ``None`` if cancelled.
     """
-    result = filedialog.askdirectory(
+    result = ctk.filedialog.askdirectory(
         parent=parent,
         initialdir=initial_dir,
         mustexist=True,

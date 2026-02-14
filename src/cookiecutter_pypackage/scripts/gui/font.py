@@ -259,5 +259,26 @@ class TkFont(TkFontBase):
     size: int = field(default=12)
     weight: Literal["normal", "bold"] = field(default="normal")
     slant: Literal["roman", "italic"] = field(default="roman")
-    underline: Literal["normal", "underline"] = field(default="normal")
-    overstrike: Literal["normal", "overstrike"] = field(default="normal")
+    underline: bool = field(default=False)
+    overstrike: bool = field(default=False)
+
+    # Add dict dunder methods to allow for unpacking into Tkinter font constructor
+    def __iter__(self):
+        yield self.family
+        yield self.size
+        yield self.weight
+        yield self.slant
+        yield self.underline
+        yield self.overstrike
+
+    def __getitem__(self, index: int) -> Any:
+        return self.value[index]
+
+    def keys(self):
+        return self.__dataclass_fields__.keys()
+
+    def values(self):
+        return self.__dataclass_fields__.values()
+
+    def items(self):
+        return self.__dataclass_fields__.items()

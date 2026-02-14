@@ -19,9 +19,10 @@ Example::
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import Any
 
-from .spec import FieldKind, FieldSpec, FormSpec, ValidatorFn, TkFont, TkFontDescription
 from .result import FormResult
+from .spec import FieldKind, FieldSpec, FormSpec, TkFont, TkFontDescription, ValidatorFn
 
 
 class DialogBuilder:
@@ -75,6 +76,7 @@ class DialogBuilder:
         label: str = "",
         default: str = "",
         help_text: str = "",
+        callback: Callable[[Any], str] | None = None,
         row: int = 0,
         col: int = 0,
         validators: list[ValidatorFn] | None = None,
@@ -89,6 +91,7 @@ class DialogBuilder:
                 label=label,
                 default=default,
                 help_text=help_text,
+                callback=callback,
                 row=row,
                 col=col,
                 validators=validators or [],
@@ -105,6 +108,7 @@ class DialogBuilder:
         label: str = "",
         default: str = "",
         help_text: str = "",
+        callback: Callable[[Any], str] | None = None,
         options: list[str] | None = None,
         readonly: bool = False,
         row: int = 0,
@@ -121,6 +125,7 @@ class DialogBuilder:
                 label=label,
                 default=default,
                 help_text=help_text,
+                callback=callback,
                 options=options or [],
                 readonly=readonly,
                 row=row,
@@ -139,6 +144,8 @@ class DialogBuilder:
         label: str = "",
         default: bool = False,
         help_text: str = "",
+        callback: Callable[..., str] | None = None,
+        bind_to: str | None = None,
         row: int = 0,
         col: int = 0,
         font: TkFontDescription | None = None,
@@ -152,6 +159,8 @@ class DialogBuilder:
                 label=label,
                 default=default,
                 help_text=help_text,
+                callback=callback,
+                bind_to=bind_to,
                 row=row,
                 col=col,
                 font=font or TkFont().value,
@@ -165,7 +174,7 @@ class DialogBuilder:
         text: str,
         *,
         help_text: str = "",
-        callback: Callable[..., str | None] | None = None,
+        callback: Callable[..., str] | None = None,
         bind_to: str | None = None,
         row: int = 0,
         col: int = 0,
