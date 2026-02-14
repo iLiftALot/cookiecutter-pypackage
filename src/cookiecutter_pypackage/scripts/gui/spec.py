@@ -43,7 +43,7 @@ message string if invalid, or ``None`` if valid."""
 
 
 @dataclass(frozen=True, slots=True)
-class FieldSpec: #: (str, os.PathLike, Any)]:
+class FieldSpec:
     """Specification for a single form field.
 
     Parameters:
@@ -64,6 +64,7 @@ class FieldSpec: #: (str, os.PathLike, Any)]:
         col: Grid column index (0-based).
         validators: Optional list of :data:`ValidatorFn` callables.
         font: Optional ``(family, size, weight, slant, underline, overstrike)`` tuple for ``LABEL`` fields.
+        is_bound: Whether the field is bound to a value in the form state dict. Used for layout and callback binding.
     """
 
     kind: FieldKind
