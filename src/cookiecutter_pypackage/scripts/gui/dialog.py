@@ -189,7 +189,7 @@ class CTkEvent[T: (tk.Misc, ctk.CTkBaseClass)](Protocol):
 _CTkEvent = CTkEvent[CTkWidget]
 
 
-class GridInfo(NamedTuple):
+class GridConfig(NamedTuple):
     column: int
     columnspan: int
     padx: tuple[int, int]
@@ -242,7 +242,7 @@ class FormDialog:
             else None
         ),
         "focus": lambda e: (
-            e.widget.focus_set() if issubclass(e.widget.__class__, tk.Misc) else None
+            e.widget.focus_set() if isinstance(e.widget, tk.Misc) else None
         ),
         # "bring_to_front": lambda e: bring_to_front_briefly(e.widget.winfo_toplevel()),
         # "center_window": lambda e: center_window(e.widget.winfo_toplevel()),
@@ -277,13 +277,16 @@ class FormDialog:
 
         # Internal state — populated during ``show()``
         self._root: ctk.CTk | None = None
-        self._dialog: ctk.CTkToplevel | ctk.Tk | None = None
+        self._root_config: dict[str, tuple[str, ...]] | None = None
+        self._dialog: ctk.CTkToplevel | ctk.CTk | None = None
         self._content: ctk.CTkFrame | None = None
+
         self._field_vars: dict[str, ctk.Variable] = {}
         self._field_widgets: dict[str, CTkWidget] = {}
         self._field_rows: dict[str, int] = {}
         self._button_widgets: dict[str, ctk.CTkButton] = {}
         self._error_labels: dict[str, ctk.CTkLabel] = {}
+
         self._first_focus: CTkWidget | None = None
         self._traces: list[tuple[ctk.Variable, _TraceMode, str]] = []
 
@@ -298,11 +301,19 @@ class FormDialog:
         self._root.title(self._spec.title)
         self._root.minsize(self._spec.min_width, self._spec.min_height)
         self._root.resizable(False, False)
-        self._root.config(pady=5, padx=5)
+
+        self._root.attributes(
+            "-topmost", True
+        )  # ensure the dialog appears above all other windows
+        self._root.attributes("-fullscreen", False)
+
+        self._root_config = self._root.config(
+            pady=7,
+            padx=7,
+            takefocus=True,
+        )
         self._root.columnconfigure(0, weight=1)
         self._root.rowconfigure(0, weight=1)
-        # disable full screen on macOS (buggy with modals)
-        # self._root.attributes("-fullscreen", False)
 
         # Cancel semantics
         self._root.protocol("WM_DELETE_WINDOW", self._on_cancel)
@@ -351,7 +362,6 @@ class FormDialog:
         """Get the callback function and modifier sequence for a given bind command."""
         if command not in FormDialog.BIND_CALLBACK_MAP:
             raise ValueError(f"Unsupported bind command: {command}")
-
         cls = FormDialog
         callback = cls.BIND_CALLBACK_MAP[command]
         default_modifier, sequence = cls.BIND_SEQUENCE_MAP[command]
@@ -373,7 +383,7 @@ class FormDialog:
         #   col 1 = entries   (stretches)
         #   col 2 = aux buttons like "Browse…"  (fixed)
         #   col 3 = action buttons like "Submit" (in the button bar, handled separately)
-        self._content.columnconfigure(0, weight=0) # other values for uniform:
+        self._content.columnconfigure(0, weight=0)  # other values for uniform:
         self._content.columnconfigure(1, weight=1, uniform="cols")
         self._content.columnconfigure(2, weight=0, uniform="cols")
         self._content.columnconfigure(3, weight=0)
@@ -461,7 +471,7 @@ class FormDialog:
         if spec.kind in (FieldKind.TEXT, FieldKind.SELECT):
             if not spec.label and not spec.is_bound:
                 # Standalone text field without a label or button
-                # - stretch across entire width.
+                # - stretch across entire width
                 col, colspan, padx, pady = 0, 3, (7, 7), (2, 2)
             elif not spec.label and spec.is_bound:
                 # No label but bound to a button (e.g. Browse…)
@@ -496,9 +506,9 @@ class FormDialog:
             else:
                 col, colspan, padx = 1, 2, (1, 7)
 
-        renderer(self, spec, GridInfo(col, colspan, padx, pady, grid_row))
+        renderer(self, spec, GridConfig(col, colspan, padx, pady, grid_row))
 
-    def _render_label(self, spec: FieldSpec, grid_info: GridInfo) -> None:
+    def _render_label(self, spec: FieldSpec, grid_info: GridConfig) -> None:
         font = spec.font if spec.font else TkFont().value
         lbl = ctk.CTkLabel(self._content, text=spec.label, font=font)
         lbl.grid(
@@ -515,7 +525,7 @@ class FormDialog:
     def _render_text(
         self,
         spec: FieldSpec,
-        grid_info: GridInfo,
+        grid_info: GridConfig,
     ) -> None:
         if spec.label:
             lbl = ctk.CTkLabel(self._content, text=spec.label)
@@ -545,7 +555,7 @@ class FormDialog:
         if self._first_focus is None:
             self._first_focus = entry
 
-    def _render_select(self, spec: FieldSpec, grid_info: GridInfo) -> None:
+    def _render_select(self, spec: FieldSpec, grid_info: GridConfig) -> None:
         if spec.label:
             lbl = ctk.CTkLabel(self._content, text=spec.label)
             lbl.grid(
@@ -576,7 +586,7 @@ class FormDialog:
         if self._first_focus is None:
             self._first_focus = combo
 
-    def _render_checkbox(self, spec: FieldSpec, grid_info: GridInfo) -> None:
+    def _render_checkbox(self, spec: FieldSpec, grid_info: GridConfig) -> None:
         if spec.label:
             lbl = ctk.CTkLabel(self._content, text=spec.label)
             lbl.grid(
@@ -598,7 +608,7 @@ class FormDialog:
             self._field_vars[spec.key] = var
             self._field_widgets[spec.key] = chk
 
-    def _render_button(self, spec: FieldSpec, grid_info: GridInfo) -> None:
+    def _render_button(self, spec: FieldSpec, grid_info: GridConfig) -> None:
         """Render an *auxiliary* button (e.g. Browse…) bound to a field.
 
         Standalone action buttons (Submit / Cancel) are handled directly
@@ -945,14 +955,14 @@ class FormDialog:
             gi = widget.grid_info()
             mapped_grid = {k: gi.get(k) for k in gi.keys()}
             grid_info_str = "\n".join(f"- {k}: {v}" for k, v in mapped_grid.items())
-            return f"{help_text}\n\n{'-' * 20}\n\nGRID INFO\n{grid_info_str}\n"
+            return f"\n{help_text}\n\n{'-' * 20}\n\nGRID INFO\n{grid_info_str}\n"
         elif self._is_packed(widget):
             pi = widget.pack_info()
             mapped_pack = {k: pi.get(k) for k in pi.keys()}
             pack_info_str = "\n".join(f"- {k}: {v}" for k, v in mapped_pack.items())
-            return f"{help_text}\n\n{'-' * 20}\n\nPACK INFO\n{pack_info_str}\n"
+            return f"\n{help_text}\n\n{'-' * 20}\n\nPACK INFO\n{pack_info_str}\n"
         else:
-            return f"{help_text}\n\n{'-' * 20}\n\nNO GRID OR PACK INFO\n(widget is not gridded or packed)\n"
+            return f"\n{help_text}\n\n{'-' * 20}\n\nNO GRID OR PACK INFO\n(widget is not gridded or packed)\n"
 
     def _debug_widget_data(self, widget: CTkWidget | None = None) -> None:
         """Print layout info for every widget in the window."""
@@ -1223,9 +1233,7 @@ class FormDialog:
             text="DEBUG: Print",
             command=lambda: self._debug_print(),
         )
-        # print_general_btn.grid(row=0, column=0, columnspan=1, padx=(7, 0), sticky=ctk.EW)
         print_general_btn.pack(side="left", fill="x", padx=(20, 2), expand=True)
-        CreateToolTip(print_general_btn, "Print field state to console")
         self._button_widgets["debug_print"] = print_general_btn
 
         print_widget_data_btn = ctk.CTkButton(
@@ -1233,12 +1241,7 @@ class FormDialog:
             text="DEBUG: Widget Data",
             command=lambda: self._debug_widget_data(),
         )
-        # print_widget_data_btn.grid(row=0, column=1, columnspan=1, padx=(7, 0), sticky=ctk.EW)
         print_widget_data_btn.pack(side="left", fill="x", padx=(2, 2), expand=True)
-        CreateToolTip(
-            print_widget_data_btn,
-            "Print layout info for every widget to console (grids, packs, etc.)",
-        )
         self._button_widgets["debug_widget_data"] = print_widget_data_btn
 
         refresh_btn = ctk.CTkButton(
@@ -1246,12 +1249,7 @@ class FormDialog:
             text="DEBUG: Refresh",
             command=_reload_and_rebuild,
         )
-        # refresh_btn.grid(row=0, column=2, columnspan=1, padx=(7, 0), sticky=ctk.EW)
         refresh_btn.pack(side="left", fill="x", padx=(2, 20), expand=True)
-        CreateToolTip(
-            refresh_btn,
-            "Rebuild the GUI while preserving field values (for testing dynamic updates)",
-        )
         self._button_widgets["debug_refresh"] = refresh_btn
 
 
@@ -1259,7 +1257,7 @@ class FormDialog:
 # Renderer dispatch table
 # ---------------------------------------------------------------------------
 
-_RENDERERS: dict[FieldKind, Callable[[FormDialog, FieldSpec, GridInfo], None]] = {
+_RENDERERS: dict[FieldKind, Callable[[FormDialog, FieldSpec, GridConfig], None]] = {
     FieldKind.LABEL: FormDialog._render_label,
     FieldKind.TEXT: FormDialog._render_text,
     FieldKind.SELECT: FormDialog._render_select,

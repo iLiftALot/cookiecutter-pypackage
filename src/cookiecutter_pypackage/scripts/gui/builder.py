@@ -19,7 +19,6 @@ Example::
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any
 
 from .result import FormResult
 from .spec import FieldKind, FieldSpec, FormSpec, TkFont, TkFontDescription, ValidatorFn
@@ -76,7 +75,7 @@ class DialogBuilder:
         label: str = "",
         default: str = "",
         help_text: str = "",
-        callback: Callable[[Any], str] | None = None,
+        callback: Callable[..., str] | None = None,
         row: int = 0,
         col: int = 0,
         validators: list[ValidatorFn] | None = None,
@@ -108,7 +107,7 @@ class DialogBuilder:
         label: str = "",
         default: str = "",
         help_text: str = "",
-        callback: Callable[[Any], str] | None = None,
+        callback: Callable[..., str] | None = None,
         options: list[str] | None = None,
         readonly: bool = False,
         row: int = 0,
