@@ -1,10 +1,26 @@
+# ---------------------------------------------------------------------------
+# Bootstrap: re-exec under the project venv if we're running under a
+# different interpreter (e.g. Homebrew's system Python).
+# ---------------------------------------------------------------------------
+# ruff: noqa: E402
+import os
+import sys
+from pathlib import Path as _Path
+
+_VENV_PYTHON = _Path("{{ cookiecutter.__template_dir }}") / ".venv" / "bin" / "python"
+
+if _VENV_PYTHON.is_file() and _Path(sys.executable).resolve() != _VENV_PYTHON.resolve():
+    os.execv(str(_VENV_PYTHON), [str(_VENV_PYTHON), *sys.argv])
+
+# ---------------------------------------------------------------------------
+
 import asyncio
 from ast import literal_eval
 from pathlib import Path
 from subprocess import run
 
 from dotenv import load_dotenv
-from iterm2_api_wrapper import create_iterm_client
+from iterm2_api_wrapper import get_shared_client
 
 from cookiecutter_pypackage.scripts import (
     GitHubRepoConfig,
@@ -65,7 +81,7 @@ async def run_hook() -> None:
             return
 
         gh_config: GitHubRepoConfig = result.to_config()
-        project_dir = gh_config.project_directory
+        project_dir = gh_config.directory
         cd_command = f"cd '{project_dir}'"
         gh_commands.extend(create_github_repository(**gh_config.asdict()))
 
@@ -77,18 +93,18 @@ async def run_hook() -> None:
         *gh_commands,
     ]
     # exit(0)
-    async with create_iterm_client(new_tab=True) as client:
-        state = await client.get_state_async()
-        for cmd in init_commands:
-            print(f">>> {INFO}{cmd}{TERMINATOR}")
-            try:
-                output = await state.run_command(cmd, timeout=120)
-                if output.strip():
-                    print(output)
-            except TimeoutError:
-                print(ERROR + f"Command timed out: {cmd}" + TERMINATOR)
-            except Exception as e:
-                print(ERROR + f"Command failed: {cmd}\nError: {e}" + TERMINATOR)
+    client = await get_shared_client(new_tab=True)
+    state = await client.get_state_async()
+    for cmd in init_commands:
+        print(f">>> {INFO}{cmd}{TERMINATOR}")
+        try:
+            output = await state.run_command(cmd, timeout=15)
+            if output.strip():
+                print(output)
+        except TimeoutError:
+            print(ERROR + f"Command timed out: {cmd}" + TERMINATOR)
+        except Exception as e:
+            print(ERROR + f"Command failed: {cmd}\nError: {e}" + TERMINATOR)
 
 
 def main() -> None:

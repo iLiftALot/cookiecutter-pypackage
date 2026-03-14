@@ -1,4 +1,4 @@
-from cookiecutter_pypackage.scripts.jinja2_extensions.pylibrary import (
+from .pylibrary import (
     Env,
     PyLibraryExtension,
     import_lib,

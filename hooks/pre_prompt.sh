@@ -62,10 +62,11 @@ log "Starting pre-prompt hook..." "yellow"
 
 # Activate the venv so Jinja2 extensions are importable
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+# SCRIPT_DIR="$(dirname "$COOKIECUTTER_CONFIG")/cookiecutter-pypackage"
 
 if [ -f "$SCRIPT_DIR/.venv/bin/activate" ]; then
     source "$SCRIPT_DIR/.venv/bin/activate"
-    log "Activated venv: " "yellow" "${SCRIPT_DIR:t}/.venv" "bold" "underline" "green"
+    log "Activated venv: " "yellow" "${SCRIPT_DIR}/.venv" "bold" "underline" "green"
 else
     log "Error: " "red" "bold" "underline" "Virtual environment not found at ${SCRIPT_DIR:t}/.venv" "red"
     exit 1

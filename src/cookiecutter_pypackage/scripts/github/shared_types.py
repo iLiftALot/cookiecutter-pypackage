@@ -11,7 +11,7 @@ class GitHubRepoConfigType(TypedDict, total=False):
     """
 
     name: str
-    project_directory: str
+    directory: str
     username: str
     branch: Literal["main", "master"] | str
     description: str
@@ -26,11 +26,11 @@ class GitHubRepoConfig(dict):
     across the dialog, the hook, and the repo-creation script.
     """
 
-    name: str = "{{ cookiecutter.__gh_slug }}"
-    project_directory: str = "{{ cookiecutter.__project_dir }}"
-    username: str = ("{{ cookiecutter.__gh_slug }}").split("/")[0]
+    name: str = ""
+    directory: str = ""
+    username: str = ""
     branch: Literal["main", "master"] | str = "master"
-    description: str = "{{ cookiecutter.project_short_description }}"
+    description: str = ""
     visibility: Literal["public", "private", "local"] = "local"
 
     def asdict(self) -> GitHubRepoConfigType:

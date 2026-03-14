@@ -134,7 +134,7 @@ class GitHubRepoDialog:
                 "browse",
                 help_text="Select the project directory.",
                 callback=_browse,
-                bind_to="project_directory",
+                bind_to="directory",
                 row=1,
                 col=2,
             )
@@ -206,9 +206,9 @@ class GitHubRepoDialog:
         generic_result = dialog.show()
 
         # Resolve the relative display path with the absolute path
-        relative_dir: str = generic_result.values.get("project_directory", "")
+        relative_dir: str = generic_result.values.get("directory", "")
         if relative_dir:
-            generic_result.values["project_directory"] = str(
+            generic_result.values["directory"] = str(
                 (Path(initial_dir).parent / relative_dir).resolve()
             )
 

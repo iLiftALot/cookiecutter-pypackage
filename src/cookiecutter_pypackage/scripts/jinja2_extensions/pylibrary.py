@@ -25,11 +25,14 @@ from json import dumps
 from pathlib import Path
 from typing import Any, Callable
 
-from dotenv import load_dotenv
 from jinja2 import Environment
 from jinja2.ext import Extension
 
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ModuleNotFoundError:
+    pass
 
 # ---------------------------------------------------------------------------
 # Decorator-based registry

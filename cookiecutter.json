@@ -20,9 +20,9 @@
     "create_github_repo": "Create a GitHub repository?"
   },
   "__debug": "{{ cookiecutter.pypi_package_name == 'python-boilerplate' }}",
-  "__project_dir": "{% set Path = import('pathlib').Path %}{{ Path(Env('PROJECT_DIR').value) if not cookiecutter.__debug else Path(Env('COOKIECUTTER_CONFIG').value).parent / 'cookiecutter-pypackage' }}",
+  "__template_dir": "{% set Path = import('pathlib').Path %}{{ Path(Env('COOKIECUTTER_CONFIG').value).parent / 'cookiecutter-pypackage' }}",
+  "__project_dir": "{% set Path = import('pathlib').Path %}{{ Path(Env('PROJECT_DIR').value) if not (cookiecutter.__debug == 'True') else cookiecutter.__template_dir }}",
   "__gh_slug": "iLiftALot/{{ cookiecutter.project_slug.replace('_', '-') }}",
-  "__extra_test": "{% set Path = import('pathlib').Path %}{{ Path.cwd().relative_to(cookiecutter.__project_dir) }}",
   "_extensions": [
     "src.cookiecutter_pypackage.scripts.jinja2_extensions.pylibrary.PyLibraryExtension"
   ]
